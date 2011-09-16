@@ -14,7 +14,6 @@ public class NewPlayer extends Player {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "G9: New Player";
 	}
 
