@@ -11,6 +11,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class NewPlayer extends Player {
+	
+	Strategy myStrategy;
+	CreatureTracker myTracker;
 
 	@Override
 	public String getName() {
@@ -20,8 +23,9 @@ public class NewPlayer extends Player {
 	@Override
 	public void newGame(Set<SeaLifePrototype> seaLifePossibilites, int penalty,
 			int d, int r, int n) {
-		// TODO Auto-generated method stub
-
+		//int dangerIndex = getBoardDanger();
+		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
+		//creatureTracker = new CreatureTracker();
 	}
 
 	@Override
@@ -33,23 +37,20 @@ public class NewPlayer extends Player {
 
 	@Override
 	public Direction getMove() {
-		Direction d = Direction.N;
-		Random r = new Random();
-		switch(r.nextInt(4)){
-		case 0:
-			d = Direction.N;
-			break;
-		case 1:
-			d = Direction.S;
-			break;
-		case 2:
-			d = Direction.E;
-			break;
-		case 3:
-			d = Direction.W;
-			break;
-		}
-		return d;
+		System.out.println("My id is: " + this.getId());
+		return myStrategy.nextMove();
 	}
-
+	
+	public Strategy decideStrategy(int dangerIndex, int numPlayers, int d){
+		return null;
+	}
+	
+	public int getBoardDanger(Set<SeaLifePrototype> seaLifePossibilites, int d, int r){
+		return 0; //0-100 Happy to Dangerous
+	}
+	
+	public String composeMessage(){
+		return null;
+	}
+	
 }
