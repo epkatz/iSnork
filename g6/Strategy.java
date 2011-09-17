@@ -12,14 +12,16 @@ public abstract class Strategy {
 	public static int d;
 	public static int r;
 	public static int n;
+	NewPlayer player;
 
 	public Strategy(Set<SeaLifePrototype> seaLifePossibilites, int penalty,
-			int d, int r, int n){
+			int d, int r, int n, NewPlayer p){
 		Strategy.seaLifePossibilites = seaLifePossibilites;
 		Strategy.penality = penalty;
 		Strategy.d = d;
 		Strategy.r = r;
 		Strategy.n = n;
+		this.player = p;
 	}
 	
 	public abstract Direction nextMove();
