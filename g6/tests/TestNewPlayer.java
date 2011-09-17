@@ -11,8 +11,6 @@ import java.util.HashSet;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
-
 public class TestNewPlayer extends TestCase {
 
 	NewPlayer player;
