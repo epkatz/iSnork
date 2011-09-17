@@ -14,6 +14,9 @@ public class NewPlayer extends Player {
 	
 	Strategy myStrategy;
 	CreatureTracker myTracker;
+	int minutesLeft;
+	Point2D currentPosition;
+	Set<Observation> whatISee;
 
 	@Override
 	public String getName() {
@@ -23,6 +26,8 @@ public class NewPlayer extends Player {
 	@Override
 	public void newGame(Set<SeaLifePrototype> seaLifePossibilites, int penalty,
 			int d, int r, int n) {
+		minutesLeft = 8 * 60;
+		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
 		//creatureTracker = new CreatureTracker();
@@ -32,12 +37,14 @@ public class NewPlayer extends Player {
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
 			Set<iSnorkMessage> incomingMessages,
 			Set<Observation> playerLocations) {
+		minutesLeft -= 1;
+		currentPosition = myPosition;
+		whatISee = whatYouSee;
 		return null;
 	}
 
 	@Override
 	public Direction getMove() {
-		System.out.println("My id is: " + this.getId());
 		return myStrategy.nextMove();
 	}
 	
