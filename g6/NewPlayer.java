@@ -14,10 +14,22 @@ public class NewPlayer extends Player {
 	
 	private Strategy myStrategy;
 	private CreatureTracker myTracker;
-	public enum Danger {
-		NONE (0.0), LOW (1.0), MEDIUM (5.0), MAYBE (0.2), HIGH (10.0), FML (20.0);
+	public static final boolean DANGER = true;
+	public static final boolean HAPPY = false;
+	public enum Level {
+		NONE (0.0), LOW (1.0), MEDIUM (5.0), MAYBE (0.2), HIGH (10.0), OMG (20.0);
 		private final double factor;
-		Danger(double factor){
+		Level(double factor){
+			this.factor = factor;
+		}
+		public double getFactor(){
+			return factor;
+		}
+	}
+	public enum Risk {
+		VERYBAD (2.0), BAD (0.5), EVEN (0.2), GOOD (0.5), VERYGOOD (2.0), NONE(0);
+		private final double factor;
+		Risk(double factor){
 			this.factor = factor;
 		}
 		public double getFactor(){
@@ -72,12 +84,34 @@ public class NewPlayer extends Player {
 		return null;
 	}
 	
-	public Danger getBoardDanger(){
+	public Risk getRisk(){
+		Level happy = getLevel(HAPPY);
+		Level danger = getLevel(DANGER);
+		if (Risk.NONE.factor*happy.factor == danger.factor){
+			return Risk.NONE;
+		}
+		else if(Risk.VERYBAD.factor*danger.factor > happy.factor){
+			return Risk.VERYBAD;
+		}
+		else if(Risk.BAD.factor*danger.factor > happy.factor){
+			return Risk.BAD;
+		}
+		else if(Risk.VERYGOOD.factor*happy.factor > danger.factor){
+			return Risk.VERYGOOD;
+		}
+		else if(Risk.GOOD.factor*happy.factor > danger.factor){
+			return Risk.GOOD;
+		}
+		else 
+			return Risk.EVEN;
+	}
+	
+	public Level getLevel(boolean isDangerous){
 		int tiles = getNumTiles();
 		int totalMaxDanger = 0;
 		int totalMinDanger = 0;
 		for (SeaLifePrototype s: seaLifePossibilites){
-			if (s.isDangerous()){
+			if (s.isDangerous() && isDangerous){
 				totalMaxDanger += s.getHappiness()*s.getMaxCount();
 				totalMinDanger += s.getHappiness()*s.getMinCount();
 			}
@@ -85,23 +119,23 @@ public class NewPlayer extends Player {
 		int averageDanger = (totalMaxDanger + totalMinDanger) / 2;
 		int varianceNumerator = (totalMaxDanger - averageDanger)*(totalMaxDanger - averageDanger) + (totalMinDanger - averageDanger)*(totalMinDanger - averageDanger);
 		int variance = varianceNumerator / 2;
-		if (variance > averageDanger * Danger.MAYBE.getFactor()){	
-			return Danger.MAYBE;
+		if (variance > averageDanger * Level.MAYBE.getFactor()){	
+			return Level.MAYBE;
 		}
-		else if ((averageDanger/tiles) <=  Danger.NONE.getFactor()){
-			return Danger.NONE;
+		else if ((averageDanger/tiles) <=  Level.NONE.getFactor()){
+			return Level.NONE;
 		}
-		else if ((averageDanger/tiles) <=  Danger.LOW.getFactor()){
-			return Danger.LOW;
+		else if ((averageDanger/tiles) <=  Level.LOW.getFactor()){
+			return Level.LOW;
 		}
-		else if ((averageDanger/tiles) <=  Danger.MEDIUM.getFactor()){
-			return Danger.MEDIUM;
+		else if ((averageDanger/tiles) <=  Level.MEDIUM.getFactor()){
+			return Level.MEDIUM;
 		}
-		else if ((averageDanger/tiles) <=  Danger.HIGH.getFactor()){
-			return Danger.HIGH;
+		else if ((averageDanger/tiles) <=  Level.HIGH.getFactor()){
+			return Level.HIGH;
 		}
 		else
-			return Danger.FML;
+			return Level.OMG;
 	}
 		
 	public String composeMessage(){
