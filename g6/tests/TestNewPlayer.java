@@ -4,6 +4,7 @@ import isnork.g6.NewPlayer;
 import isnork.g6.NewPlayer.Level;
 import isnork.g6.NewPlayer.Risk;
 import isnork.sim.GameConfig;
+import isnork.sim.Observation;
 import isnork.sim.SeaLifePrototype;
 
 import java.io.File;

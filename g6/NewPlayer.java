@@ -7,11 +7,12 @@ import isnork.sim.SeaLifePrototype;
 import isnork.sim.iSnorkMessage;
 
 import java.awt.geom.Point2D;
-import java.util.Random;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class NewPlayer extends Player {
 	
+	private LinkedList<Node> path;
 	private Strategy myStrategy;
 	private CreatureTracker myTracker;
 	public static final boolean DANGER = true;
@@ -36,11 +37,11 @@ public class NewPlayer extends Player {
 			return factor;
 		}
 	}
-	private static int d;
-	private static int r;
-	private static int n;
-	private static Set<SeaLifePrototype> seaLifePossibilites;
-	private static int penality;
+	static int d;
+	static int r;
+	static int n;
+	static Set<SeaLifePrototype> seaLifePossibilites;
+	static int penality;
 	int minutesLeft;
 	Point2D currentPosition;
 	Set<Observation> whatISee;
