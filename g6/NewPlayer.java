@@ -7,6 +7,7 @@ import isnork.sim.SeaLifePrototype;
 import isnork.sim.iSnorkMessage;
 
 import java.awt.geom.Point2D;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
 
@@ -43,13 +44,15 @@ public class NewPlayer extends Player {
 	private static int penality;
 	int minutesLeft;
 	Point2D currentPosition;
+	Point2D destination;
 	Set<Observation> whatISee;
+	LinkedList<Node> currentPath;
 
 	@Override
 	public String getName() {
 		return "G9: New Player";
 	}
-
+	
 	@Override
 	public void newGame(Set<SeaLifePrototype> seaLifePossibilites, int penalty,
 			int d, int r, int n) {
@@ -60,6 +63,7 @@ public class NewPlayer extends Player {
 		NewPlayer.n = n;
 		minutesLeft = 8 * 60;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
+		this.currentPath = new LinkedList<Node>();
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
 		//creatureTracker = new CreatureTracker();

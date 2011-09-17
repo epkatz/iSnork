@@ -24,8 +24,24 @@ public class BalancedStrategy extends Strategy {
 
 	@Override
 	public Direction nextMove() {
-		// if it's the first turn, pick a direction
-		if (player.minutesLeft == 8 * 60 - 1)
+		if (player.currentPath.isEmpty())
+		{
+			if (player.minutesLeft == 8 * 60 - 1)
+			{
+				player.destination = determineInitialDestination();
+			}
+			else
+			{
+				player.destination = new Point2D.Double(0, 0);
+			}
+			player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
+		}
+		
+		Node nextMove = player.currentPath.pop();
+//		System.out.println("returning direction " + nextMove.getDirection());
+		return nextMove.getDirection();
+/*		// if it's the first turn, pick a direction
+		if (NewPlayer.getMinutesLeft() == 8 * 60 - 1)
 		{
 			currentDirection = determineInitialDirection();
 			preferredDirection = currentDirection;
@@ -37,31 +53,43 @@ public class BalancedStrategy extends Strategy {
 		}
 		
 		return currentDirection;
+		*/
 	}
 	
-	private Direction determineInitialDirection()
+	private Point2D determineInitialDestination()
 	{
+		Point2D destination = new Point2D.Double();
 		// direction determined by player id
 		switch(Math.abs(player.getId()) % 8)
 		{
 		case 0:
-			return Direction.N;
+			destination.setLocation(0, d);
+			break;
 		case 1:
-			return Direction.S;
+			destination.setLocation(0, -1 * d);
+			break;
 		case 2:
-			return Direction.E;
+			destination.setLocation(d, 0);
+			break;
 		case 3:
-			return Direction.W;
+			destination.setLocation(-1 * d, 0);
+			break;
 		case 4:
-			return Direction.NE;
+			destination.setLocation(d, d);
+			break;
 		case 5:
-			return Direction.SW;
+			destination.setLocation(-1 * d, -1 * d);
+			break;
 		case 6:
-			return Direction.NW;
+			destination.setLocation(-1 * d, d);
+			break;
 		case 7:
-			return Direction.SE;
+			destination.setLocation(d, -1 * d);
+			break;
 		}
-		return null;
+		
+//		System.out.println("Destination for player with id " + player.getId() + " is " + destination);
+		return destination;
 	}
 	
 	private Direction determineNextDirection()
