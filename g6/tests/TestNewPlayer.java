@@ -21,13 +21,9 @@ public class TestNewPlayer extends TestCase {
 	int r = 5;
 	int penalty = 0;
 	int n = 20;
-
-	@Before
-	public void setUp() throws Exception {
-		player = new NewPlayer();
-	}
 	
 	public void setupBoard(File f){
+		player = new NewPlayer();
 		protos = new HashSet<SeaLifePrototype>();
 		GameConfig config = new GameConfig();
 		config.setSelectedBoard(f);
