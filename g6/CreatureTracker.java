@@ -12,6 +12,7 @@ public class CreatureTracker {
 	
 	public CreatureTracker(Set<SeaLifePrototype> seaLifePossibilites){
 		creaturesSeen = new LinkedList<Creature>();
+		
 	}
 	
 	public void seeCreature(int id, String name){
