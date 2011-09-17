@@ -12,7 +12,7 @@ public abstract class Strategy {
 	public static int d;
 	public static int r;
 	public static int n;
-	NewPlayer player;
+	public NewPlayer player;
 
 	public Strategy(Set<SeaLifePrototype> seaLifePossibilites, int penalty,
 			int d, int r, int n, NewPlayer p){
