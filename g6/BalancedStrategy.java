@@ -11,14 +11,13 @@ import isnork.sim.SeaLifePrototype;
 import java.awt.geom.Point2D;
 
 public class BalancedStrategy extends Strategy {
-	Direction currentDirection;
-	Direction preferredDirection; // direction according to pattern
+	Point2D lastDestination;
 	int acceptableDanger;
 
 	public BalancedStrategy(Set<SeaLifePrototype> seaLifePossibilites,
 			int penalty, int d, int r, int n, NewPlayer p) {
 		super(seaLifePossibilites, penalty, d, r, n, p);
-		
+
 		acceptableDanger = 0;
 	}
 
@@ -28,11 +27,14 @@ public class BalancedStrategy extends Strategy {
 		{
 			if (player.minutesLeft == 8 * 60 - 1)
 			{
+				lastDestination = new Point2D.Double(0, 0);
 				player.destination = determineInitialDestination();
 			}
 			else
 			{
-				player.destination = new Point2D.Double(0, 0);
+				Point2D nextDest = determineNextDestination();
+				lastDestination = player.destination;
+				player.destination = nextDest;
 			}
 			player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
 		}
@@ -92,7 +94,67 @@ public class BalancedStrategy extends Strategy {
 		return destination;
 	}
 	
-	private Direction determineNextDirection()
+	private Point2D determineNextDestination()
+	{
+		System.out.println("My last destination was " + lastDestination);
+		System.out.println("My current destination is " + player.destination);
+		System.out.println("My current location is " + player.currentPosition);
+		Point2D nextDest;
+		// if player is headed to the middle (and presumably is there now)
+		if (player.destination.distance(0, 0) == 0)
+		{
+			nextDest = getDestinationCounterClockwiseFrom(lastDestination);
+		}
+		// else if player is headed away from the middle, they should head back
+		else
+		{
+			nextDest = new Point2D.Double(0,0);
+		}
+		
+		System.out.println("My new destination is " + nextDest);
+		
+		return nextDest;
+	}
+	
+	private Point2D getDestinationCounterClockwiseFrom(Point2D p)
+	{
+		Point2D p2 = new Point2D.Double();
+		if (p.distance(0,20) == 0)
+		{
+			p2.setLocation(20, 20);
+		}
+		else if (p.distance(20, 20) == 0)
+		{
+			p2.setLocation(20, 0);
+		}
+		else if (p.distance(20, 0) == 0)
+		{
+			p2.setLocation(20, -20);
+		}
+		else if (p.distance(20, -20) == 0)
+		{
+			p2.setLocation(0, -20);
+		}
+		else if (p.distance(0, -20) == 0)
+		{
+			p2.setLocation(-20, -20);
+		}
+		else if (p.distance(-20, -20) == 0)
+		{
+			p2.setLocation(-20, 0);
+		}
+		else if (p.distance(-20, 0) == 0)
+		{
+			p2.setLocation(-20, 20);
+		}
+		else if (p.distance(-20, 20) == 0)
+		{
+			p2.setLocation(0, 20);
+		}
+		
+		return p2;
+	}
+/*	private Direction determineNextDirection()
 	{
 		// make a list of where all the dangerous creatures are
 		List<Direction> dangerousDir = new ArrayList<Direction>();
@@ -114,7 +176,7 @@ public class BalancedStrategy extends Strategy {
 			return Direction.STAYPUT;
 		}
 		// test the direction from pattern against danger
-		Direction nextDir = getNextDirInPattern();
+//		Direction nextDir = getNextDirInPattern();
 		while (dangerousDir.contains(nextDir))
 		{
 			// while it's dangerous, try a different direction
@@ -123,9 +185,9 @@ public class BalancedStrategy extends Strategy {
 		
 		// return final direction decision
 		return nextDir;
-	}
+	}*/
 	
-	private Direction getNextDirInPattern()
+/*	private Direction getNextDirInPattern()
 	{
 		if (atTheWall(player.currentPosition))
 		{
@@ -136,9 +198,9 @@ public class BalancedStrategy extends Strategy {
 			preferredDirection = moveClockwise(preferredDirection, 1);
 		}
 		return preferredDirection;
-	}
+	}*/
 	
-	private boolean atBoat(Point2D p)
+/*	private boolean atBoat(Point2D p)
 	{
 		if (p.getX() == 0 && p.getY() == 0)
 		{
@@ -148,9 +210,9 @@ public class BalancedStrategy extends Strategy {
 		{
 			return false;
 		}
-	}
+	}*/
 	
-	private boolean atTheWall(Point2D p)
+/*	private boolean atTheWall(Point2D p)
 	{
 		if (Math.abs(p.getX()) == d || Math.abs(p.getY()) == d)
 		{
@@ -160,9 +222,9 @@ public class BalancedStrategy extends Strategy {
 		{
 			return false;
 		}
-	}
+	}*/
 	
-	private Direction moveClockwise(Direction d, int numSteps)
+/*	private Direction moveClockwise(Direction d, int numSteps)
 	{
 		if (numSteps == 0 || d == Direction.STAYPUT)
 		{
@@ -202,7 +264,7 @@ public class BalancedStrategy extends Strategy {
 			}
 			return moveClockwise(d, numSteps - 1);
 		}
-	}
+	}*/
 	
 	private Direction getDirectionFromPoints(Point2D from, Point2D to)
 	{
