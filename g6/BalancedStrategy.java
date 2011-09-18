@@ -50,11 +50,16 @@ public class BalancedStrategy extends Strategy {
 				player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
 			}
 		}
-		else if (!player.destination.equals(boatLocation)) // need to head back if not already
+		else if (timeBackToBoat == player.minutesLeft)
 		{
 			lastDestination = player.destination;
 			player.destination = boatLocation;
 			player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
+			Node stayPutNode = new Node(Direction.STAYPUT, player.minutesLeft);
+			for (int i = 0; i <= (player.minutesLeft - (player.currentPath.size())); ++i)
+			{
+				player.currentPath.add(stayPutNode);
+			}
 		}
 		
 		Node nextMove = player.currentPath.getFirst();
@@ -63,7 +68,7 @@ public class BalancedStrategy extends Strategy {
 		
 		if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 		{
-//			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
+			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
 		}
 
 		nextMove = player.currentPath.pop();
