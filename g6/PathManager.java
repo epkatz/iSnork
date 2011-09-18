@@ -72,6 +72,28 @@ public class PathManager {
 		return path;
 	}
 	
+	public static double computeDiagonalSpaces(Point2D from, Point2D to)
+	{
+		double deltax = Math.abs(from.getX() - to.getX());
+		double deltay = Math.abs(from.getY() - to.getY());
+		
+		return (Math.min(deltax, deltay));
+	}
+	
+	public static double computeAdjacentSpaces(Point2D from, Point2D to)
+	{
+		double deltax = Math.abs(from.getX() - to.getX());
+		double deltay = Math.abs(from.getY() - to.getY());
+		
+		return (Math.abs(deltax - deltay));
+	}
+	
+	public static double computeTotalSpaces(Point2D from, Point2D to)
+	{
+		return (computeDiagonalSpaces(from, to) + computeAdjacentSpaces(from, to));
+	}
+
+	
 //	public LinkedList<>
 	
 }

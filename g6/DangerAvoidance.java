@@ -31,14 +31,18 @@ public class DangerAvoidance {
 			double newPosY = currentPosition.getY() + nextD.getDy();
 			Point2D newPoint = new Point2D.Double(newPosX, newPosY);
 			if (!atBoat(newPoint) && !isLocationDangerous(whatISee, newPoint)){
-				if tilesAway(newPoint)
+// commented because my project wouldn't compile
+//				if tilesAway(newPoint)
 			}
 		}
 		
+		
+		return null; // added because my project wouldn't compile
 	}
 
 	public int tilesAway(Point2D me, Point2D them) {
 		return (int) me.distance(them);
+//		return ((int)PathManager.computeTotalSpaces(me, them));
 	}
 
 	// public void alterPath(LinkedList<Node> path, Point2D destination,

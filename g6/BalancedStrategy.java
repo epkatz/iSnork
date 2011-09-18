@@ -11,57 +11,65 @@ import isnork.sim.SeaLifePrototype;
 import java.awt.geom.Point2D;
 
 public class BalancedStrategy extends Strategy {
+	public static final Point2D boatLocation = new Point2D.Double(0,0);
+
 	Point2D lastDestination;
 	int acceptableDanger;
+	double timeBackToBoat;
+	int dangerAvoidTravelTime;
+	int turnAroundTimeAllowance;
+	
 
 	public BalancedStrategy(Set<SeaLifePrototype> seaLifePossibilites,
 			int penalty, int d, int r, int n, NewPlayer p) {
 		super(seaLifePossibilites, penalty, d, r, n, p);
 
+		turnAroundTimeAllowance = 7;
+		dangerAvoidTravelTime = 0; // should be determined by danger quota
+			// should this variable be stored in player?
+		timeBackToBoat = 0; // time back to boat starts at 0 because diver starts on the boat
 		acceptableDanger = 0;
 	}
 
 	@Override
 	public Direction nextMove() {
-		if (player.currentPath.isEmpty())
+		timeBackToBoat = (PathManager.computeDiagonalSpaces(player.currentPosition, boatLocation) * 3) 
+				+ (PathManager.computeAdjacentSpaces(player.currentPosition, boatLocation) * 2)
+				+ dangerAvoidTravelTime
+				+ turnAroundTimeAllowance;
+		if (timeBackToBoat < player.minutesLeft)
 		{
-			if (player.minutesLeft == 8 * 60 - 1)
+			if (player.currentPath.isEmpty())
 			{
-				lastDestination = new Point2D.Double(0, 0);
-				player.destination = determineInitialDestination();
+				if (player.minutesLeft == 8 * 60 - 1)
+				{
+					lastDestination = boatLocation;
+					player.destination = determineInitialDestination();
+				}
+				else
+				{
+					Point2D nextDest = determineNextDestination();
+					lastDestination = player.destination;
+					player.destination = nextDest;
+				}
+				player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
 			}
-			else
-			{
-				Point2D nextDest = determineNextDestination();
-				lastDestination = player.destination;
-				player.destination = nextDest;
-			}
-			player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
+		}
+		else if (!player.destination.equals(boatLocation))
+		{
+			lastDestination = player.destination;
+			player.destination = boatLocation;
+			player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
 		}
 		
 		Node nextMove = player.currentPath.pop();
-//		System.out.println("returning direction " + nextMove.getDirection());
 		return nextMove.getDirection();
-/*		// if it's the first turn, pick a direction
-		if (NewPlayer.getMinutesLeft() == 8 * 60 - 1)
-		{
-			currentDirection = determineInitialDirection();
-			preferredDirection = currentDirection;
-		}
-		// otherwise, continue the pattern
-		else
-		{
-			currentDirection = determineNextDirection();
-		}
-		
-		return currentDirection;
-		*/
 	}
 	
 	private Point2D determineInitialDestination()
 	{
 		Point2D destination = new Point2D.Double();
-		// direction determined by player id
+		// destination determined by player id
 		switch(Math.abs(player.getId()) % 8)
 		{
 		case 0:
@@ -96,22 +104,17 @@ public class BalancedStrategy extends Strategy {
 	
 	private Point2D determineNextDestination()
 	{
-		System.out.println("My last destination was " + lastDestination);
-		System.out.println("My current destination is " + player.destination);
-		System.out.println("My current location is " + player.currentPosition);
 		Point2D nextDest;
 		// if player is headed to the middle (and presumably is there now)
-		if (player.destination.distance(0, 0) == 0)
+		if (player.destination.distance(boatLocation) == 0)
 		{
 			nextDest = getDestinationCounterClockwiseFrom(lastDestination);
 		}
 		// else if player is headed away from the middle, they should head back
 		else
 		{
-			nextDest = new Point2D.Double(0,0);
+			nextDest = boatLocation;
 		}
-		
-		System.out.println("My new destination is " + nextDest);
 		
 		return nextDest;
 	}
@@ -119,41 +122,42 @@ public class BalancedStrategy extends Strategy {
 	private Point2D getDestinationCounterClockwiseFrom(Point2D p)
 	{
 		Point2D p2 = new Point2D.Double();
-		if (p.distance(0,20) == 0)
+		if (p.distance(0,d) == 0)
 		{
-			p2.setLocation(20, 20);
+			p2.setLocation(d, d);
 		}
-		else if (p.distance(20, 20) == 0)
+		else if (p.distance(d, d) == 0)
 		{
-			p2.setLocation(20, 0);
+			p2.setLocation(d, 0);
 		}
-		else if (p.distance(20, 0) == 0)
+		else if (p.distance(d, 0) == 0)
 		{
-			p2.setLocation(20, -20);
+			p2.setLocation(d, -1 * d);
 		}
-		else if (p.distance(20, -20) == 0)
+		else if (p.distance(d, -1 * d) == 0)
 		{
-			p2.setLocation(0, -20);
+			p2.setLocation(0, -1 * d);
 		}
-		else if (p.distance(0, -20) == 0)
+		else if (p.distance(0, -1 * d) == 0)
 		{
-			p2.setLocation(-20, -20);
+			p2.setLocation(-1 * d, -1 * d);
 		}
-		else if (p.distance(-20, -20) == 0)
+		else if (p.distance(-1 * d, -1 * d) == 0)
 		{
-			p2.setLocation(-20, 0);
+			p2.setLocation(-1 * d, 0);
 		}
-		else if (p.distance(-20, 0) == 0)
+		else if (p.distance(-1 * d, 0) == 0)
 		{
-			p2.setLocation(-20, 20);
+			p2.setLocation(-1 * d, d);
 		}
-		else if (p.distance(-20, 20) == 0)
+		else if (p.distance(-1 * d, d) == 0)
 		{
-			p2.setLocation(0, 20);
+			p2.setLocation(0, d);
 		}
 		
 		return p2;
 	}
+		
 /*	private Direction determineNextDirection()
 	{
 		// make a list of where all the dangerous creatures are
