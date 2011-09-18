@@ -49,7 +49,7 @@ public class DangerAvoidance {
 		}
 		if (bestDirection == null){
 			Random r = new Random();
-			Direction randomDirection = directionOptions.get(r.nextInt(Direction.values().length));
+			Direction randomDirection = directionOptions.get(r.nextInt(Direction.values().length-1));
 			newL.add(randomDirection);
 			double newPosX = currentPosition.getX() + randomDirection.getDx();
 			double newPosY = currentPosition.getY() + randomDirection.getDy();
