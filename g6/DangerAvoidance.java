@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 
 public class DangerAvoidance {
@@ -47,7 +48,8 @@ public class DangerAvoidance {
 			}
 		}
 		if (bestDirection == null){
-			Direction randomDirection = directionOptions.get(0);
+			Random r = new Random();
+			Direction randomDirection = directionOptions.get(r.nextInt(Direction.values().length));
 			newL.add(randomDirection);
 			double newPosX = currentPosition.getX() + randomDirection.getDx();
 			double newPosY = currentPosition.getY() + randomDirection.getDy();
