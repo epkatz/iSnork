@@ -63,23 +63,24 @@ public class BalancedStrategy extends Strategy {
 		
 		if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 		{
-			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, , player.currentPosition))
-//			updatePathToAvoidDanger(new LinkedList<Node>());
+//			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
 		}
 
 		nextMove = player.currentPath.pop();
 		return nextMove.getDirection();
 	}
 	
-	private void updatePathToAvoidDanger(LinkedList<Node> newPath)
+	private void updatePathToAvoidDanger(LinkedList<Direction> safeDirections)
 	{
+		LinkedList<Node> newPath = new LinkedList<Node>();
 		Point2D position = player.currentPosition;
 		double x = position.getX();
 		double y = position.getY();
-		for (Node n : newPath)
+		for (Direction d : safeDirections)
 		{
-			x += n.getDirection().getDx();
-			y += n.getDirection().getDy();
+			x += d.getDx();
+			y += d.getDy();
+			newPath.add(new Node(d, player.minutesLeft));
 		}
 		position.setLocation(x, y);
 		
