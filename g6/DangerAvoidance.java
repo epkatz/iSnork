@@ -6,6 +6,7 @@ import isnork.sim.Observation;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class DangerAvoidance {
@@ -23,32 +24,49 @@ public class DangerAvoidance {
 		return false;
 	}
 
-	public Direction bestDirection(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+	public LinkedList<Direction> bestDirections(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+		LinkedList<Direction> newL = new LinkedList<Direction>();
 		ArrayList<Direction> directionOptions = Direction.allBut(d);
+		Direction bestDirection = null;
 		Point2D bestPoint = null;
 		for (Direction nextD : directionOptions) {
 			double newPosX = currentPosition.getX() + nextD.getDx();
 			double newPosY = currentPosition.getY() + nextD.getDy();
 			Point2D newPoint = new Point2D.Double(newPosX, newPosY);
 			if (!atBoat(newPoint) && !isLocationDangerous(whatISee, newPoint)){
-// commented because my project wouldn't compile
-//				if tilesAway(newPoint)
+				if (bestPoint == null){
+					bestPoint = newPoint;
+					bestDirection = nextD;
+				}
+				else{
+					if (tilesAway(currentPosition, newPoint) < tilesAway(currentPosition, bestPoint)){
+						bestPoint = newPoint;
+						bestDirection = nextD;
+					}
+				}
 			}
 		}
-		
-		
-		return null; // added because my project wouldn't compile
+		if (bestDirection == null){
+			Direction randomDirection = directionOptions.get(0);
+			newL.add(randomDirection);
+			double newPosX = currentPosition.getX() + randomDirection.getDx();
+			double newPosY = currentPosition.getY() + randomDirection.getDy();
+			Point2D randomPoint = new Point2D.Double(newPosX, newPosY);
+			LinkedList<Direction> temp = bestDirections(whatISee, randomDirection, randomPoint);
+			for (Direction tmpD: temp){
+				newL.add(tmpD);
+			}
+			return newL;
+		}
+		else{
+			newL.add(bestDirection);
+			return newL;
+		}
 	}
 
 	public int tilesAway(Point2D me, Point2D them) {
-		return (int) me.distance(them);
-//		return ((int)PathManager.computeTotalSpaces(me, them));
+		return ((int)PathManager.computeTotalSpaces(me, them));
 	}
-
-	// public void alterPath(LinkedList<Node> path, Point2D destination,
-	// PathManager pManager){
-	// LinkedList<Node> startRoute
-	// }
 
 	public static boolean atBoat(Point2D p) {
 		if (p.getX() == 0 && p.getY() == 0) {
