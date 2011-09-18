@@ -31,27 +31,20 @@ public class DangerAvoidance {
 		ArrayList<Direction> directionOptions = Direction.allBut(d);
 		ArrayList<Direction> possibleSafePlaces = new ArrayList<Direction>();
 		for (Direction nextD : directionOptions) {
-			double newPosX = currentPosition.getX() + nextD.getDx();
-			double newPosY = currentPosition.getY() + nextD.getDy();
-			Point2D newPoint = new Point2D.Double(newPosX, newPosY);
+			Point2D newPoint = getPointFromDirectionandPosition(
+					currentPosition, nextD);
 			if (!atTheWall(newPoint) && !isLocationDangerous(whatISee, newPoint)) {
 					possibleSafePlaces.add(nextD);
 			}
 		}
 		if (possibleSafePlaces.isEmpty()) {
-			Direction randomDirection = null;
-			do {
+			for (int i = 0; i < 4; i++){
+				Direction randomDirection = null;
 				Random r = new Random();
-				randomDirection = directionOptions.get(r.nextInt(Direction.values().length - 1));
-			} while (randomDirection == Direction.STAYPUT);
-			newL.add(randomDirection);
-			double newPosX = currentPosition.getX() + randomDirection.getDx();
-			double newPosY = currentPosition.getY() + randomDirection.getDy();
-			Point2D randomPoint = new Point2D.Double(newPosX, newPosY);
-			LinkedList<Direction> temp = bestDirections(whatISee,
-					randomDirection, randomPoint);
-			for (Direction tmpD : temp) {
-				newL.add(tmpD);
+				do {
+					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
+				} while (randomDirection.getDx() == 0 && randomDirection.getDy() == 0);
+				newL.add(randomDirection);
 			}
 			return newL;
 		} else {
@@ -60,13 +53,21 @@ public class DangerAvoidance {
 				newL.add(possibleSafePlaces.remove(0));
 				return newL;
 			}
+			Random r = new Random();
 			do {
-				Random r = new Random();
 				randomDirection = directionOptions.get(r.nextInt(possibleSafePlaces.size()));
-			} while (randomDirection == Direction.STAYPUT);
+			} while (randomDirection.getDx() == 0 && randomDirection.getDy() == 0);
 			newL.add(randomDirection);
 			return newL;
 		}
+	}
+
+	private Point2D getPointFromDirectionandPosition(Point2D currentPosition,
+			Direction nextD) {
+		double newPosX = currentPosition.getX() + nextD.getDx();
+		double newPosY = currentPosition.getY() + nextD.getDy();
+		Point2D newPoint = new Point2D.Double(newPosX, newPosY);
+		return newPoint;
 	}
 
 	public int tilesAway(Point2D me, Point2D them) {
