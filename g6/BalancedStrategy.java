@@ -55,11 +55,10 @@ public class BalancedStrategy extends Strategy {
 			lastDestination = player.destination;
 			player.destination = boatLocation;
 			player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
-			Node stayPutNode = new Node(Direction.STAYPUT, player.minutesLeft);
-			for (int i = 0; i <= (player.minutesLeft - (player.currentPath.size())); ++i)
-			{
-				player.currentPath.add(stayPutNode);
-			}
+		}
+		else if (player.currentPosition.equals(boatLocation) && player.currentPath.isEmpty())
+		{
+			return Direction.STAYPUT;
 		}
 		
 		Node nextMove = player.currentPath.getFirst();
@@ -77,6 +76,10 @@ public class BalancedStrategy extends Strategy {
 	
 	private void updatePathToAvoidDanger(LinkedList<Direction> safeDirections)
 	{
+		if (safeDirections == null)
+		{
+			System.out.println("NULL LINKED LIST");
+		}
 		LinkedList<Node> newPath = new LinkedList<Node>();
 		Point2D position = player.currentPosition;
 		double x = position.getX();

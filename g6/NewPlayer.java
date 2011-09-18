@@ -52,7 +52,7 @@ public class NewPlayer extends Player {
 
 	@Override
 	public String getName() {
-		return "G9: New Player";
+		return "G6: SELECT from team_names WHERE attribute = 'clever'";
 	}
 	
 	@Override
