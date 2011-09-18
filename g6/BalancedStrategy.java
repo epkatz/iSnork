@@ -1,11 +1,9 @@
 package isnork.g6;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Set;
 
 import isnork.sim.GameObject.Direction;
-import isnork.sim.Observation;
 import isnork.sim.SeaLifePrototype;
 
 import java.awt.geom.Point2D;
@@ -16,28 +14,25 @@ public class BalancedStrategy extends Strategy {
 	Point2D lastDestination;
 	int acceptableDanger;
 	double timeBackToBoat;
-	int dangerAvoidTravelTime;
-	int turnAroundTimeAllowance;
+	DangerAvoidance dangerAvoid;
 	
 
 	public BalancedStrategy(Set<SeaLifePrototype> seaLifePossibilites,
 			int penalty, int d, int r, int n, NewPlayer p) {
 		super(seaLifePossibilites, penalty, d, r, n, p);
 
-		turnAroundTimeAllowance = 7;
-		dangerAvoidTravelTime = 0; // should be determined by danger quota
-			// should this variable be stored in player?
 		timeBackToBoat = 0; // time back to boat starts at 0 because diver starts on the boat
 		acceptableDanger = 0;
+		dangerAvoid = new DangerAvoidance();
 	}
 
 	@Override
 	public Direction nextMove() {
 		timeBackToBoat = (PathManager.computeDiagonalSpaces(player.currentPosition, boatLocation) * 3) 
 				+ (PathManager.computeAdjacentSpaces(player.currentPosition, boatLocation) * 2)
-				+ dangerAvoidTravelTime
-				+ turnAroundTimeAllowance;
-		if (timeBackToBoat < player.minutesLeft)
+				+ NewPlayer.dangerAvoidTravelTime
+				+ NewPlayer.turnAroundTimeAllowance;
+		if (timeBackToBoat < player.minutesLeft) // don't need to head back yet
 		{
 			if (player.currentPath.isEmpty())
 			{
@@ -55,15 +50,43 @@ public class BalancedStrategy extends Strategy {
 				player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
 			}
 		}
-		else if (!player.destination.equals(boatLocation))
+		else if (!player.destination.equals(boatLocation)) // need to head back if not already
 		{
 			lastDestination = player.destination;
 			player.destination = boatLocation;
 			player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
 		}
 		
-		Node nextMove = player.currentPath.pop();
+		Node nextMove = player.currentPath.getFirst();
+		Point2D nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
+												nextMove.getDirection().getDy() + player.currentPosition.getY());
+		
+		if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
+		{
+			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, , player.currentPosition))
+//			updatePathToAvoidDanger(new LinkedList<Node>());
+		}
+
+		nextMove = player.currentPath.pop();
 		return nextMove.getDirection();
+	}
+	
+	private void updatePathToAvoidDanger(LinkedList<Node> newPath)
+	{
+		Point2D position = player.currentPosition;
+		double x = position.getX();
+		double y = position.getY();
+		for (Node n : newPath)
+		{
+			x += n.getDirection().getDx();
+			y += n.getDirection().getDy();
+		}
+		position.setLocation(x, y);
+		
+		LinkedList<Node> directPath = PathManager.buildPath(position, player.destination, player.minutesLeft);
+		newPath.addAll(directPath);
+		
+		player.currentPath = newPath;
 	}
 	
 	private Point2D determineInitialDestination()
@@ -270,7 +293,7 @@ public class BalancedStrategy extends Strategy {
 		}
 	}*/
 	
-	private Direction getDirectionFromPoints(Point2D from, Point2D to)
+/*	private Direction getDirectionFromPoints(Point2D from, Point2D to)
 	{
 		double deltax = from.getX() - to.getX();
 		double deltay = from.getY() - to.getY();
@@ -311,6 +334,6 @@ public class BalancedStrategy extends Strategy {
 		}
 
 		return d;
-	}
+	}*/
 
 }
