@@ -33,7 +33,7 @@ public class DangerAvoidance {
 			double newPosX = currentPosition.getX() + nextD.getDx();
 			double newPosY = currentPosition.getY() + nextD.getDy();
 			Point2D newPoint = new Point2D.Double(newPosX, newPosY);
-			if (!atBoat(newPoint) && !isLocationDangerous(whatISee, newPoint)){
+			if (!atTheWall(newPoint) && !isLocationDangerous(whatISee, newPoint)){
 				if (bestPoint == null){
 					bestPoint = newPoint;
 					bestDirection = nextD;
