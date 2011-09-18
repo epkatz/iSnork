@@ -1,6 +1,7 @@
 package isnork.g6;
 
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 
 import isnork.sim.GameObject.Direction;
@@ -15,6 +16,10 @@ public class BalancedStrategy extends Strategy {
 	int acceptableDanger;
 	double timeBackToBoat;
 	DangerAvoidance dangerAvoid;
+	boolean stayAtBoat;
+	Node nextMove;
+	Point2D nextPosition;
+	Random r = new Random();
 	
 
 	public BalancedStrategy(Set<SeaLifePrototype> seaLifePossibilites,
@@ -24,54 +29,80 @@ public class BalancedStrategy extends Strategy {
 		timeBackToBoat = 0; // time back to boat starts at 0 because diver starts on the boat
 		acceptableDanger = 0;
 		dangerAvoid = new DangerAvoidance();
+		stayAtBoat = false;
 	}
 
 	@Override
 	public Direction nextMove() {
-		timeBackToBoat = (PathManager.computeDiagonalSpaces(player.currentPosition, boatLocation) * 3) 
-				+ (PathManager.computeAdjacentSpaces(player.currentPosition, boatLocation) * 2)
-				+ NewPlayer.dangerAvoidTravelTime
-				+ NewPlayer.turnAroundTimeAllowance;
-		if (timeBackToBoat < player.minutesLeft) // don't need to head back yet
+		if (stayAtBoat && player.currentPosition.distance(boatLocation) == 0)
 		{
-			if (player.currentPath.isEmpty())
-			{
-				if (player.minutesLeft == 8 * 60 - 1)
-				{
-					lastDestination = boatLocation;
-					player.destination = determineInitialDestination();
-				}
-				else
-				{
-					Point2D nextDest = determineNextDestination();
-					lastDestination = player.destination;
-					player.destination = nextDest;
-				}
-				player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
-			}
-		}
-		else if (timeBackToBoat == player.minutesLeft)
-		{
-			lastDestination = player.destination;
-			player.destination = boatLocation;
-			player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
-		}
-		else if (player.currentPosition.equals(boatLocation) && player.currentPath.isEmpty())
-		{
+//			System.out.println("Returning Direction " + Direction.STAYPUT);
 			return Direction.STAYPUT;
 		}
-		
-		Node nextMove = player.currentPath.getFirst();
-		Point2D nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
+/*		if (timeBackToBoat < player.minutesLeft - travelTime) // don't need to head back yet
+		{*/
+		if (player.currentPath.isEmpty())
+		{
+			createNextPath();
+		}
+			
+		nextMove = player.currentPath.getFirst();
+		nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
 												nextMove.getDirection().getDy() + player.currentPosition.getY());
+		if (!stayAtBoat)
+		{
+			int travelTime = 0;
+			if (nextMove.getDirection().isDiag())
+			{
+				travelTime = 3;
+			}
+			else if (!nextMove.getDirection().isDiag() && nextMove.getDirection() != Direction.STAYPUT)
+			{
+				travelTime = 2;
+			}
 		
+			timeBackToBoat = (PathManager.computeDiagonalSpaces(nextPosition, boatLocation) * 3) 
+					+ (PathManager.computeAdjacentSpaces(nextPosition, boatLocation) * 2)
+					+ NewPlayer.dangerAvoidTravelTime; // computes how much time it would take to get back to the boat
+										// if I move where I'm intending to move
+
+			if (timeBackToBoat > player.minutesLeft - travelTime)
+			{
+				lastDestination = player.destination;
+				player.destination = boatLocation;
+				player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
+				stayAtBoat = true;
+			}
+		}
+		
+/*		}
+		else if (player.destination.distance(boatLocation) != 0)
+		{*/
+				
 		if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 		{
-			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
+//			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
 		}
 
 		nextMove = player.currentPath.pop();
+//		System.out.println("Returning Direction " + nextMove.getDirection());
 		return nextMove.getDirection();
+	}
+
+	private void createNextPath() {
+		if (player.minutesLeft == 8 * 60 - 1)
+		{
+			lastDestination = boatLocation;
+			player.destination = determineInitialDestination();
+		}
+		else
+		{
+			Point2D nextDest = determineNextDestination();
+//			Point2D nextDest = new Point2D.Double(r.nextInt() % (d + 1), r.nextInt() % (d + 1));
+			lastDestination = player.destination;
+			player.destination = nextDest;
+		}
+		player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
 	}
 	
 	private void updatePathToAvoidDanger(LinkedList<Direction> safeDirections)
