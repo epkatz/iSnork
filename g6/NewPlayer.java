@@ -1,5 +1,6 @@
 package isnork.g6;
 
+import isnork.g5.StaticIsnork;
 import isnork.sim.GameEngine;
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
@@ -8,13 +9,10 @@ import isnork.sim.SeaLifePrototype;
 import isnork.sim.iSnorkMessage;
 
 import java.awt.geom.Point2D;
-<<<<<<< HEAD
 import java.util.LinkedList;
-=======
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
->>>>>>> added Creature Tracker
 import java.util.Set;
 
 
@@ -69,43 +67,23 @@ public class NewPlayer extends Player {
 		NewPlayer.d = d;
 		NewPlayer.r = r;
 		NewPlayer.n = n;
+		
 		minutesLeft = 8 * 60;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
-<<<<<<< HEAD
 		this.currentPath = new LinkedList<Node>();
-=======
 		initializeTracker();
->>>>>>> added Creature Tracker
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
 	}
 	
-	public void initializeTracker() {
+	private void initializeTracker() {
 		myTracker = new LinkedList<CreatureTracker>();
-		for(int i = 0; i < n; i++)
+		for(int i = 0; i < n; i++) 
 			myTracker.add(new CreatureTracker(i));
-		
+
 	}
 	
-	private void updatePlayerTracker() {
 	
-		for(int i = 0; i < n; i++) {
-			CreatureTracker creatureTracker = getWhatPlayerSaw(i);
-			for(Object obj : whatISee) {
-				Observation creature = (Observation)obj;
-				if(creature.getName() == "G9: New Player")
-					continue;
-				if(!creatureTracker.didSeeCreature(creature.getName())) {
-					creatureTracker.addToTracker(creature);
-					System.out.print("Player " + i + " First time seeing: " + creature.getName() + "\n");
-				} else {
-					System.out.print("Player " + i + " Already saw: " + creature.getName()+ "\n");
-				}
-					
-			}
-		}
-		
-	}
 		
 	
 	private CreatureTracker getWhatPlayerSaw(int id) {
@@ -113,7 +91,7 @@ public class NewPlayer extends Player {
 		if(id < 0) id *= -1;
 		for(int i = 0; i < myTracker.size();  i++) {
 			CreatureTracker creatureTracker = myTracker.get(i);
-			if(creatureTracker.getPlayerID() == i)
+			if(creatureTracker.getPlayerID() == id)
 				return creatureTracker;
 		}
 		
@@ -121,7 +99,25 @@ public class NewPlayer extends Player {
 		return null;
 	}
 	 
-	
+	private void updatePlayerTracker() {
+		
+		//**uncomment lines for debuggin and printing tracker list to the console
+		CreatureTracker creatureTracker = getWhatPlayerSaw(getId());
+		//int id = getId() * -1; //make positive
+		//creatureTracker.printListOfSeenCreatures();
+		for(Object obj : whatISee) {
+			Observation creature = (Observation)obj;
+			if(creature.getName() == "G9: New Player")
+				continue;
+			if(!creatureTracker.didSeeCreature(creature.getName())) {
+				creatureTracker.addToTracker(creature);
+				//System.out.print("Player " + id + " First time seeing: " + creature.getName() + "\n");
+			} else {
+				//System.out.print("Player " + i + " Already saw: " + creature.getName()+ "\n");
+			}
+		}
+		
+	}
 	
 	@Override
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
@@ -130,14 +126,7 @@ public class NewPlayer extends Player {
 		minutesLeft -= 1;
 		currentPosition = myPosition;
 		whatISee = whatYouSee;
-		//update the player's tracker
-		
-		/*for (Object obj : whatISee)
-		{
-			// for each creature I see, check if it's dangerous
-			Observation o = (Observation)obj;
-			System.out.print("Name: " + o.getName() + "\n");
-		}*/
+
 		updatePlayerTracker();
 		
 		return null;

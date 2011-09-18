@@ -18,7 +18,7 @@ public class CreatureTracker {
 	public void addToTracker(Observation creature) {
 		Creature newCreature = new Creature(creature.getName());
 		creaturesSeen.add(newCreature);
-		System.out.print("added new creature: " + creature.getName() + "\n");
+		//System.out.print("Player " + playerID + "added new creature: " + creature.getName() + "\n");
 	}
 	
 	public LinkedList<Creature> getListOfCreatures() {
@@ -38,6 +38,14 @@ public class CreatureTracker {
 		}
 		//if here then creature not in list
 		return false;
+	}
+	
+	public void printListOfSeenCreatures() {
+		System.out.print("TRACKER LIST FOR PLAYER: " + playerID + "\n");
+		for(int i = 0; i < creaturesSeen.size(); i++) {
+			int temp = i+1;
+			System.out.print("creature " + temp + ": " + creaturesSeen.get(i).creature + "\n");
+		}
 	}
 	
 //	//retrieve element index of specified creature
