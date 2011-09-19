@@ -1,5 +1,6 @@
 package isnork.g6;
 
+import isnork.sim.GameEngine;
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
 
@@ -25,45 +26,45 @@ public class DangerAvoidance {
 		return false;
 	}
 
-	public LinkedList<Direction> bestDirections(Set<Observation> whatISee,
-			Direction d, Point2D currentPosition) {
+	public LinkedList<Direction> bestDirections(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
 		LinkedList<Direction> newL = new LinkedList<Direction>();
-		ArrayList<Direction> directionOptions = Direction.allBut(d);
-		ArrayList<Direction> possibleSafePlaces = new ArrayList<Direction>();
-		for (Direction nextD : directionOptions) {
-			Point2D newPoint = getPointFromDirectionandPosition(
-					currentPosition, nextD);
-			if (!atTheWall(newPoint) && !isLocationDangerous(whatISee, newPoint)) {
-					possibleSafePlaces.add(nextD);
-			}
-		}
-		if (possibleSafePlaces.isEmpty()) {
-			for (int i = 0; i < 4; i++){
+		Random r = new Random();
+		Direction prevD = d;
+		Point2D prevP = currentPosition;
+		int end = (r.nextInt(10) + 5);
+		for (int i = 0; i < end; i++) {
+			Direction newD = getDirection(whatISee, prevD, prevP);
+			if (newD == null) {
+				ArrayList<Direction> directionOptions = Direction.allBut(prevD);
 				Direction randomDirection = null;
-				Random r = new Random();
+				Point2D randomPoint = currentPosition;
 				do {
 					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
-				} while (randomDirection.getDx() == 0 && randomDirection.getDy() == 0);
-				newL.add(randomDirection);
+					randomPoint = getPointFromDirectionandPosition(prevP, randomDirection);
+				} while (illegalMove(randomPoint));
+				newD = randomDirection;
 			}
-			return newL;
-		} else {
-			Direction randomDirection = null;
-			if (possibleSafePlaces.size() == 1){
-				newL.add(possibleSafePlaces.remove(0));
-				return newL;
-			}
-			Random r = new Random();
-			do {
-				randomDirection = directionOptions.get(r.nextInt(possibleSafePlaces.size()));
-			} while (randomDirection.getDx() == 0 && randomDirection.getDy() == 0);
-			newL.add(randomDirection);
-			return newL;
+			newL.add(newD);
+			prevD = newD;
+			prevP = getPointFromDirectionandPosition(prevP, newD);
 		}
+		return newL;
 	}
 
-	private Point2D getPointFromDirectionandPosition(Point2D currentPosition,
-			Direction nextD) {
+	public Direction getDirection(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+		ArrayList<Direction> directionOptions = Direction.allBut(d);
+		for (Direction nextD : directionOptions) {
+			Point2D newPoint = getPointFromDirectionandPosition(currentPosition, nextD);
+			if (!illegalMove(newPoint) && !isLocationDangerous(whatISee, newPoint)) {
+				if (!(nextD.getDx() == 0 && nextD.getDy() == 0)) {
+					return nextD;
+				}
+			}
+		}
+		return null;
+	}
+
+	private Point2D getPointFromDirectionandPosition(Point2D currentPosition, Direction nextD) {
 		double newPosX = currentPosition.getX() + nextD.getDx();
 		double newPosY = currentPosition.getY() + nextD.getDy();
 		Point2D newPoint = new Point2D.Double(newPosX, newPosY);
@@ -83,8 +84,15 @@ public class DangerAvoidance {
 	}
 
 	public static boolean atTheWall(Point2D p) {
-		if (Math.abs(p.getX()) == NewPlayer.d
-				|| Math.abs(p.getY()) == NewPlayer.d) {
+		if (Math.abs(p.getX()) == NewPlayer.d || Math.abs(p.getY()) == NewPlayer.d) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean illegalMove(Point2D p) {
+		if (Math.abs(p.getX()) == (NewPlayer.d + 1) || Math.abs(p.getY()) == (NewPlayer.d + 1)) {
 			return true;
 		} else {
 			return false;

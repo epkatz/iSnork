@@ -55,7 +55,7 @@ public class BalancedStrategy extends Strategy {
 		
 		if (timeBackToBoatFromCurrent < player.minutesLeft - 3 && dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 		{
-//			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
+			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
 		}
 
 		nextMove = player.currentPath.pop();

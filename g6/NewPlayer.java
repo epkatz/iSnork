@@ -10,11 +10,13 @@ import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.Set;
 
+
 public class NewPlayer extends Player {
 	
 	private LinkedList<Node> path;
 	private Strategy myStrategy;
-	private CreatureTracker myTracker;
+	private LinkedList<CreatureTracker> myTracker;
+	public static final int turnAroundTimeAllowance = 7;
 	public static int dangerAvoidTravelTime = 0; // default for really happy maps
 //TODO: initialize dangerAvoidTravelTime when determining how dangerous the board is
 	public static final boolean DANGER = true;
@@ -63,15 +65,59 @@ public class NewPlayer extends Player {
 		NewPlayer.d = d;
 		NewPlayer.r = r;
 		NewPlayer.n = n;
+		
 		minutesLeft = 8 * 60;
 		assignTravelTimeAllowance();
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
 		this.currentPath = new LinkedList<Node>();
+		initializeTracker();
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
-		//creatureTracker = new CreatureTracker();
 	}
+	
+	private void initializeTracker() {
+		myTracker = new LinkedList<CreatureTracker>();
+		for(int i = 0; i < n; i++) 
+			myTracker.add(new CreatureTracker(i));
 
+	}
+	
+	
+		
+	
+	private CreatureTracker getWhatPlayerSaw(int id) {
+		//make id positive
+		if(id < 0) id *= -1;
+		for(int i = 0; i < myTracker.size();  i++) {
+			CreatureTracker creatureTracker = myTracker.get(i);
+			if(creatureTracker.getPlayerID() == id)
+				return creatureTracker;
+		}
+		
+		System.out.print("ERROR: Diver's tracker could not be found");
+		return null;
+	}
+	 
+	private void updatePlayerTracker() {
+		
+		//**uncomment lines for debuggin and printing tracker list to the console
+		CreatureTracker creatureTracker = getWhatPlayerSaw(getId());
+		int id = getId() * -1; //make positive
+		//creatureTracker.printListOfSeenCreatures();
+		for(Object obj : whatISee) {
+			Observation creature = (Observation)obj;
+			if(!creatureTracker.didSeeCreature(creature.getName())) {
+				creatureTracker.addToTracker(creature);
+				//System.out.print("Player " + id + " First time seeing: " + creature.getName() + "\n");
+			} else {
+				//add id to the list
+				creatureTracker.seeCreature(creature);
+				//System.out.print("Player " + id + " Already saw: " + creature.getName()+ "\n");
+			}
+		}
+		
+	}
+	
 	@Override
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
 			Set<iSnorkMessage> incomingMessages,
@@ -79,6 +125,7 @@ public class NewPlayer extends Player {
 		minutesLeft -= 1;
 		currentPosition = myPosition;
 		whatISee = whatYouSee;
+		updatePlayerTracker();
 		return null;
 	}
 
