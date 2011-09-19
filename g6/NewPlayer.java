@@ -1,7 +1,5 @@
 package isnork.g6;
 
-import isnork.g5.StaticIsnork;
-import isnork.sim.GameEngine;
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
 import isnork.sim.Player;
@@ -10,9 +8,6 @@ import isnork.sim.iSnorkMessage;
 
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Random;
 import java.util.Set;
 
 
@@ -21,6 +16,8 @@ public class NewPlayer extends Player {
 	private LinkedList<Node> path;
 	private Strategy myStrategy;
 	private LinkedList<CreatureTracker> myTracker;
+	public static int dangerAvoidTravelTime;
+	public static final int turnAroundTimeAllowance = 7;
 	public static final boolean DANGER = true;
 	public static final boolean HAPPY = false;
 	public enum Level {
@@ -56,7 +53,7 @@ public class NewPlayer extends Player {
 
 	@Override
 	public String getName() {
-		return "G9: New Player";
+		return "G6: SELECT from team_names WHERE attribute = 'clever'";
 	}
 	
 	@Override
@@ -103,17 +100,17 @@ public class NewPlayer extends Player {
 		
 		//**uncomment lines for debuggin and printing tracker list to the console
 		CreatureTracker creatureTracker = getWhatPlayerSaw(getId());
-		//int id = getId() * -1; //make positive
+		int id = getId() * -1; //make positive
 		//creatureTracker.printListOfSeenCreatures();
 		for(Object obj : whatISee) {
 			Observation creature = (Observation)obj;
-			if(creature.getName() == "G9: New Player")
-				continue;
 			if(!creatureTracker.didSeeCreature(creature.getName())) {
 				creatureTracker.addToTracker(creature);
 				//System.out.print("Player " + id + " First time seeing: " + creature.getName() + "\n");
 			} else {
-				//System.out.print("Player " + i + " Already saw: " + creature.getName()+ "\n");
+				//add id to the list
+				creatureTracker.seeCreature(creature);
+				//System.out.print("Player " + id + " Already saw: " + creature.getName()+ "\n");
 			}
 		}
 		
@@ -126,9 +123,7 @@ public class NewPlayer extends Player {
 		minutesLeft -= 1;
 		currentPosition = myPosition;
 		whatISee = whatYouSee;
-
 		updatePlayerTracker();
-		
 		return null;
 	}
 

@@ -6,6 +6,8 @@ import isnork.sim.Observation;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 
 public class DangerAvoidance {
@@ -23,32 +25,54 @@ public class DangerAvoidance {
 		return false;
 	}
 
-	public Direction bestDirection(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+	public LinkedList<Direction> bestDirections(Set<Observation> whatISee,
+			Direction d, Point2D currentPosition) {
+		LinkedList<Direction> newL = new LinkedList<Direction>();
 		ArrayList<Direction> directionOptions = Direction.allBut(d);
-		Point2D bestPoint = null;
+		ArrayList<Direction> possibleSafePlaces = new ArrayList<Direction>();
 		for (Direction nextD : directionOptions) {
-			double newPosX = currentPosition.getX() + nextD.getDx();
-			double newPosY = currentPosition.getY() + nextD.getDy();
-			Point2D newPoint = new Point2D.Double(newPosX, newPosY);
-			if (!atBoat(newPoint) && !isLocationDangerous(whatISee, newPoint)){
-// commented because my project wouldn't compile
-//				if tilesAway(newPoint)
+			Point2D newPoint = getPointFromDirectionandPosition(
+					currentPosition, nextD);
+			if (!atTheWall(newPoint) && !isLocationDangerous(whatISee, newPoint)) {
+					possibleSafePlaces.add(nextD);
 			}
 		}
-		
-		
-		return null; // added because my project wouldn't compile
+		if (possibleSafePlaces.isEmpty()) {
+			for (int i = 0; i < 4; i++){
+				Direction randomDirection = null;
+				Random r = new Random();
+				do {
+					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
+				} while (randomDirection.getDx() == 0 && randomDirection.getDy() == 0);
+				newL.add(randomDirection);
+			}
+			return newL;
+		} else {
+			Direction randomDirection = null;
+			if (possibleSafePlaces.size() == 1){
+				newL.add(possibleSafePlaces.remove(0));
+				return newL;
+			}
+			Random r = new Random();
+			do {
+				randomDirection = directionOptions.get(r.nextInt(possibleSafePlaces.size()));
+			} while (randomDirection.getDx() == 0 && randomDirection.getDy() == 0);
+			newL.add(randomDirection);
+			return newL;
+		}
+	}
+
+	private Point2D getPointFromDirectionandPosition(Point2D currentPosition,
+			Direction nextD) {
+		double newPosX = currentPosition.getX() + nextD.getDx();
+		double newPosY = currentPosition.getY() + nextD.getDy();
+		Point2D newPoint = new Point2D.Double(newPosX, newPosY);
+		return newPoint;
 	}
 
 	public int tilesAway(Point2D me, Point2D them) {
-		return (int) me.distance(them);
-//		return ((int)PathManager.computeTotalSpaces(me, them));
+		return ((int) PathManager.computeTotalSpaces(me, them));
 	}
-
-	// public void alterPath(LinkedList<Node> path, Point2D destination,
-	// PathManager pManager){
-	// LinkedList<Node> startRoute
-	// }
 
 	public static boolean atBoat(Point2D p) {
 		if (p.getX() == 0 && p.getY() == 0) {
@@ -59,7 +83,8 @@ public class DangerAvoidance {
 	}
 
 	public static boolean atTheWall(Point2D p) {
-		if (Math.abs(p.getX()) == NewPlayer.d || Math.abs(p.getY()) == NewPlayer.d) {
+		if (Math.abs(p.getX()) == NewPlayer.d
+				|| Math.abs(p.getY()) == NewPlayer.d) {
 			return true;
 		} else {
 			return false;

@@ -17,6 +17,7 @@ public class CreatureTracker {
 	
 	public void addToTracker(Observation creature) {
 		Creature newCreature = new Creature(creature.getName());
+		newCreature.addID(creature.getId());
 		creaturesSeen.add(newCreature);
 		//System.out.print("Player " + playerID + "added new creature: " + creature.getName() + "\n");
 	}
@@ -47,34 +48,27 @@ public class CreatureTracker {
 			System.out.print("creature " + temp + ": " + creaturesSeen.get(i).creature + "\n");
 		}
 	}
+
+	public void seeCreature(Observation creature){
+		for(Object obj : creaturesSeen) {
+			Creature tempCreature = (Creature)obj;
+			if(tempCreature.creature == creature.getName()) {
+				//System.out.print("inside\n");
+				if(tempCreature.isMaxedOut()) {
+					//System.out.print("Player: " + playerID + " has seen 3 or more " + creature.getName() + "\n");
+				} else {
+					if(tempCreature.didSeeID(creature.getId()));
+						//System.out.print("Player: " + playerID + " already seen ID " + creature.getId() + "\n");
+					else {
+						tempCreature.addID(creature.getId());
+						//System.out.print("Added a unique id: " + creature.getId() + " of species: " + creature.getName() + "to Player " + playerID + " tracker\n");
+					}
+				}
+			}
+			
+		}
+	}
 	
-//	//retrieve element index of specified creature
-//	public int getCreatureIndex(String name) {
-//		for(int i = 0; i < creaturesSeen.size(); i++) {
-//			Creature tempObject = creaturesSeen.get(i);
-//			if(tempObject.creature)
-//				return i;
-//		}
-//		//error if reached here
-//		System.out.print("ERROR: inside creature tracker get method");
-//		return -1;
-//		
-//	}
-//	
-//	public void seeCreature(int id, String name){
-//		if(!didSeeCreature(name)) {
-//			//add creature to the list
-//			Creature newCreature = new Creature(name);
-//			newCreature.addID(id);			
-//			//add this to the creature tracker
-//			creaturesSeen.add(newCreature);
-//			System.out.print("added creature: " + name + "\n" );
-//		} else {
-//			int creatureIndex = getCreatureIndex(name);
-//			
-//		}
-//		
-//	}
 	
 	public class Creature {
 		LinkedList<Integer> seen; //store id of the creatures seen
@@ -101,6 +95,12 @@ public class CreatureTracker {
 		
 		public String getName() {
 			return creature;
+		}
+		
+		public boolean didSeeID(int id) {
+			if(seen.contains(id))
+				return true;
+			return false;
 		}
 	}
 	
