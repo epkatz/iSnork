@@ -64,6 +64,7 @@ public class NewPlayer extends Player {
 		NewPlayer.r = r;
 		NewPlayer.n = n;
 		minutesLeft = 8 * 60;
+		assignTravelTimeAllowance();
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
 		this.currentPath = new LinkedList<Node>();
 		//int dangerIndex = getBoardDanger();
@@ -88,6 +89,32 @@ public class NewPlayer extends Player {
 	
 	public Strategy decideStrategy(){
 		return null;
+	}
+	
+	public void assignTravelTimeAllowance()
+	{
+		int minPerMove = 3;
+		switch(getLevel(DANGER))
+		{
+		case NONE:
+			dangerAvoidTravelTime = 0;
+			break;
+		case LOW:
+			dangerAvoidTravelTime = d * minPerMove;
+			break;
+		case MEDIUM:
+			dangerAvoidTravelTime = d * 2 * minPerMove;
+			break;
+		case MAYBE:
+			dangerAvoidTravelTime = d * minPerMove;
+			break;
+		case HIGH:
+			dangerAvoidTravelTime = d * 3 * minPerMove;
+			break;
+		case OMG:
+			dangerAvoidTravelTime = d * 4 * minPerMove;
+			break;
+		}
 	}
 	
 	public Risk getRisk(){
