@@ -1,10 +1,7 @@
 package isnork.g6;
 
 import java.util.LinkedList;
-<<<<<<< HEAD
-=======
 import java.util.Random;
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 import java.util.Set;
 
 import isnork.sim.GameObject.Direction;
@@ -19,13 +16,10 @@ public class BalancedStrategy extends Strategy {
 	int acceptableDanger;
 	double timeBackToBoat;
 	DangerAvoidance dangerAvoid;
-<<<<<<< HEAD
-=======
 	boolean stayAtBoat;
 	Node nextMove;
 	Point2D nextPosition;
 	Random r = new Random();
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 	
 
 	public BalancedStrategy(Set<SeaLifePrototype> seaLifePossibilites,
@@ -35,23 +29,17 @@ public class BalancedStrategy extends Strategy {
 		timeBackToBoat = 0; // time back to boat starts at 0 because diver starts on the boat
 		acceptableDanger = 0;
 		dangerAvoid = new DangerAvoidance();
-<<<<<<< HEAD
-=======
 		stayAtBoat = false;
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 	}
 
 	@Override
 	public Direction nextMove() {
-<<<<<<< HEAD
 		timeBackToBoat = (PathManager.computeDiagonalSpaces(player.currentPosition, boatLocation) * 3) 
 				+ (PathManager.computeAdjacentSpaces(player.currentPosition, boatLocation) * 2)
 				+ NewPlayer.dangerAvoidTravelTime
 				+ NewPlayer.turnAroundTimeAllowance;
 		if (timeBackToBoat < player.minutesLeft) // don't need to head back yet
-=======
 		if (stayAtBoat && player.currentPosition.distance(boatLocation) == 0)
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 		{
 //			System.out.println("Returning Direction " + Direction.STAYPUT);
 			return Direction.STAYPUT;
@@ -91,9 +79,7 @@ public class BalancedStrategy extends Strategy {
 				stayAtBoat = true;
 			}
 		}
-<<<<<<< HEAD
 		else if (timeBackToBoat == player.minutesLeft)
-=======
 		
 /*		}
 		else if (player.destination.distance(boatLocation) != 0)
@@ -116,7 +102,6 @@ public class BalancedStrategy extends Strategy {
 			player.destination = determineInitialDestination();
 		}
 		else
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 		{
 			Point2D nextDest = determineNextDestination();
 //			Point2D nextDest = new Point2D.Double(r.nextInt() % (d + 1), r.nextInt() % (d + 1));
@@ -124,49 +109,6 @@ public class BalancedStrategy extends Strategy {
 			player.destination = nextDest;
 		}
 		player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
-	}
-	
-	private void updatePathToAvoidDanger(LinkedList<Direction> safeDirections)
-	{
-		if (safeDirections == null)
-		{
-			System.out.println("NULL LINKED LIST");
-		}
-		LinkedList<Node> newPath = new LinkedList<Node>();
-		Point2D position = player.currentPosition;
-		double x = position.getX();
-		double y = position.getY();
-		for (Direction d : safeDirections)
-		{
-			x += d.getDx();
-			y += d.getDy();
-			newPath.add(new Node(d, player.minutesLeft));
-		}
-<<<<<<< HEAD
-		else if (player.currentPosition.equals(boatLocation) && player.currentPath.isEmpty())
-		{
-			return Direction.STAYPUT;
-		}
-		
-		Node nextMove = player.currentPath.getFirst();
-		Point2D nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
-												nextMove.getDirection().getDy() + player.currentPosition.getY());
-		
-		if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
-		{
-			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
-		}
-
-		nextMove = player.currentPath.pop();
-		return nextMove.getDirection();
-=======
-		position.setLocation(x, y);
-		
-		LinkedList<Node> directPath = PathManager.buildPath(position, player.destination, player.minutesLeft);
-		newPath.addAll(directPath);
-		
-		player.currentPath = newPath;
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 	}
 	
 	private void updatePathToAvoidDanger(LinkedList<Direction> safeDirections)

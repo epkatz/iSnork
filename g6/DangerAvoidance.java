@@ -26,7 +26,6 @@ public class DangerAvoidance {
 		return false;
 	}
 
-<<<<<<< HEAD
 	public LinkedList<Direction> bestDirections(Set<Observation> whatISee,
 			Direction d, Point2D currentPosition) {
 		LinkedList<Direction> newL = new LinkedList<Direction>();
@@ -64,33 +63,30 @@ public class DangerAvoidance {
 		}
 	}
 
-	private Point2D getPointFromDirectionandPosition(Point2D currentPosition,
-			Direction nextD) {
-=======
-	public LinkedList<Direction> bestDirections(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
-		LinkedList<Direction> newL = new LinkedList<Direction>();
-		Random r = new Random();
-		Direction prevD = d;
-		Point2D prevP = currentPosition;
-		int end = (r.nextInt(10) + 5);
-		for (int i = 0; i < end; i++) {
-			Direction newD = getDirection(whatISee, prevD, prevP);
-			if (newD == null) {
-				ArrayList<Direction> directionOptions = Direction.allBut(prevD);
-				Direction randomDirection = null;
-				Point2D randomPoint = currentPosition;
-				do {
-					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
-					randomPoint = getPointFromDirectionandPosition(prevP, randomDirection);
-				} while (illegalMove(randomPoint));
-				newD = randomDirection;
-			}
-			newL.add(newD);
-			prevD = newD;
-			prevP = getPointFromDirectionandPosition(prevP, newD);
-		}
-		return newL;
-	}
+//	public LinkedList<Direction> bestDirections(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+//		LinkedList<Direction> newL = new LinkedList<Direction>();
+//		Random r = new Random();
+//		Direction prevD = d;
+//		Point2D prevP = currentPosition;
+//		int end = (r.nextInt(10) + 5);
+//		for (int i = 0; i < end; i++) {
+//			Direction newD = getDirection(whatISee, prevD, prevP);
+//			if (newD == null) {
+//				ArrayList<Direction> directionOptions = Direction.allBut(prevD);
+//				Direction randomDirection = null;
+//				Point2D randomPoint = currentPosition;
+//				do {
+//					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
+//					randomPoint = getPointFromDirectionandPosition(prevP, randomDirection);
+//				} while (illegalMove(randomPoint));
+//				newD = randomDirection;
+//			}
+//			newL.add(newD);
+//			prevD = newD;
+//			prevP = getPointFromDirectionandPosition(prevP, newD);
+//		}
+//		return newL;
+//	}
 
 	public Direction getDirection(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
 		ArrayList<Direction> directionOptions = Direction.allBut(d);
@@ -106,7 +102,6 @@ public class DangerAvoidance {
 	}
 
 	private Point2D getPointFromDirectionandPosition(Point2D currentPosition, Direction nextD) {
->>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 		double newPosX = currentPosition.getX() + nextD.getDx();
 		double newPosY = currentPosition.getY() + nextD.getDy();
 		Point2D newPoint = new Point2D.Double(newPosX, newPosY);
