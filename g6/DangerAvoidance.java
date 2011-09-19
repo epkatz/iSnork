@@ -1,5 +1,6 @@
 package isnork.g6;
 
+import isnork.sim.GameEngine;
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
 
@@ -25,6 +26,7 @@ public class DangerAvoidance {
 		return false;
 	}
 
+<<<<<<< HEAD
 	public LinkedList<Direction> bestDirections(Set<Observation> whatISee,
 			Direction d, Point2D currentPosition) {
 		LinkedList<Direction> newL = new LinkedList<Direction>();
@@ -64,6 +66,47 @@ public class DangerAvoidance {
 
 	private Point2D getPointFromDirectionandPosition(Point2D currentPosition,
 			Direction nextD) {
+=======
+	public LinkedList<Direction> bestDirections(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+		LinkedList<Direction> newL = new LinkedList<Direction>();
+		Random r = new Random();
+		Direction prevD = d;
+		Point2D prevP = currentPosition;
+		int end = (r.nextInt(10) + 5);
+		for (int i = 0; i < end; i++) {
+			Direction newD = getDirection(whatISee, prevD, prevP);
+			if (newD == null) {
+				ArrayList<Direction> directionOptions = Direction.allBut(prevD);
+				Direction randomDirection = null;
+				Point2D randomPoint = currentPosition;
+				do {
+					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
+					randomPoint = getPointFromDirectionandPosition(prevP, randomDirection);
+				} while (illegalMove(randomPoint));
+				newD = randomDirection;
+			}
+			newL.add(newD);
+			prevD = newD;
+			prevP = getPointFromDirectionandPosition(prevP, newD);
+		}
+		return newL;
+	}
+
+	public Direction getDirection(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+		ArrayList<Direction> directionOptions = Direction.allBut(d);
+		for (Direction nextD : directionOptions) {
+			Point2D newPoint = getPointFromDirectionandPosition(currentPosition, nextD);
+			if (!illegalMove(newPoint) && !isLocationDangerous(whatISee, newPoint)) {
+				if (!(nextD.getDx() == 0 && nextD.getDy() == 0)) {
+					return nextD;
+				}
+			}
+		}
+		return null;
+	}
+
+	private Point2D getPointFromDirectionandPosition(Point2D currentPosition, Direction nextD) {
+>>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 		double newPosX = currentPosition.getX() + nextD.getDx();
 		double newPosY = currentPosition.getY() + nextD.getDy();
 		Point2D newPoint = new Point2D.Double(newPosX, newPosY);
@@ -85,6 +128,14 @@ public class DangerAvoidance {
 	public static boolean atTheWall(Point2D p) {
 		if (Math.abs(p.getX()) == NewPlayer.d
 				|| Math.abs(p.getY()) == NewPlayer.d) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean illegalMove(Point2D p) {
+		if (Math.abs(p.getX()) == (NewPlayer.d + 1) || Math.abs(p.getY()) == (NewPlayer.d + 1)) {
 			return true;
 		} else {
 			return false;

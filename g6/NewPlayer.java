@@ -15,9 +15,15 @@ public class NewPlayer extends Player {
 	
 	private LinkedList<Node> path;
 	private Strategy myStrategy;
+<<<<<<< HEAD
 	private LinkedList<CreatureTracker> myTracker;
 	public static int dangerAvoidTravelTime;
 	public static final int turnAroundTimeAllowance = 7;
+=======
+	private CreatureTracker myTracker;
+	public static int dangerAvoidTravelTime = 0; // default for really happy maps
+//TODO: initialize dangerAvoidTravelTime when determining how dangerous the board is
+>>>>>>> 04afbcc2ccfdb258fc1515634a189c73c8705a4e
 	public static final boolean DANGER = true;
 	public static final boolean HAPPY = false;
 	public enum Level {
