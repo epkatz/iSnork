@@ -34,11 +34,6 @@ public class BalancedStrategy extends Strategy {
 
 	@Override
 	public Direction nextMove() {
-		timeBackToBoat = (PathManager.computeDiagonalSpaces(player.currentPosition, boatLocation) * 3) 
-				+ (PathManager.computeAdjacentSpaces(player.currentPosition, boatLocation) * 2)
-				+ NewPlayer.dangerAvoidTravelTime
-				+ NewPlayer.turnAroundTimeAllowance;
-		if (timeBackToBoat < player.minutesLeft) // don't need to head back yet
 		if (stayAtBoat && player.currentPosition.distance(boatLocation) == 0)
 		{
 //			System.out.println("Returning Direction " + Direction.STAYPUT);
@@ -79,7 +74,6 @@ public class BalancedStrategy extends Strategy {
 				stayAtBoat = true;
 			}
 		}
-		else if (timeBackToBoat == player.minutesLeft)
 		
 /*		}
 		else if (player.destination.distance(boatLocation) != 0)
