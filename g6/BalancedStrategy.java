@@ -65,7 +65,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 			{
-//				updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
+//				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
 			}
 		}
 
@@ -125,7 +125,7 @@ public class BalancedStrategy extends Strategy {
 			}
 			if (destinationId == player.getId())
 			{
-				CoordinateCalculator.updateCoordMap();
+				CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
 			}
 			Point2D nextDest = CoordinateCalculator.coordMap.get(destinationId);
 			System.out.println("Player " + player.getId() + " is heading to a destination of " + player.destination);
@@ -135,28 +135,26 @@ public class BalancedStrategy extends Strategy {
 		player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
 	}
 	
-	private void updatePathToAvoidDanger(LinkedList<Direction> safeDirections)
+	private void updatePathToAvoidDanger(LinkedList<Node> safePath)
 	{
-		if (safeDirections == null)
+		if (safePath == null)
 		{
 			System.out.println("NULL LINKED LIST");
 		}
-		LinkedList<Node> newPath = new LinkedList<Node>();
 		Point2D position = player.currentPosition;
 		double x = position.getX();
 		double y = position.getY();
-		for (Direction d : safeDirections)
+		for (Node n : safePath)
 		{
-			x += d.getDx();
-			y += d.getDy();
-			newPath.add(new Node(d, player.minutesLeft));
+			x += n.getDirection().getDx();
+			y += n.getDirection().getDy();
 		}
 		position.setLocation(x, y);
 		
 		LinkedList<Node> directPath = PathManager.buildPath(position, player.destination, player.minutesLeft);
-		newPath.addAll(directPath);
+		safePath.addAll(directPath);
 		
-		player.currentPath = newPath;
+		player.currentPath = safePath;
 	}
 	
 /*	private Point2D determineInitialDestination()

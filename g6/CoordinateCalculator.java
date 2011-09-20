@@ -12,6 +12,7 @@ public class CoordinateCalculator {
 	static double maxPoint;
 	static double nextIteration;
 	static boolean headedIn;
+	static int callCounter;
 	
 	public static void initCoordinateCalculator(int d, int r, int n)
 	{
@@ -20,6 +21,7 @@ public class CoordinateCalculator {
 		CoordinateCalculator.n = n;
 		
 		nextIteration = 0;
+		callCounter = 0;
 		headedIn = true;
 		coordMap = new HashMap<Integer, Point2D>();
 		for (int i = 0; i > n * -1; --i)
@@ -28,9 +30,9 @@ public class CoordinateCalculator {
 		}
 	}
 	
-	public static void updateCoordMap()
+	public static void updateCoordMap(double iteration)
 	{
-		double indent = r/2 + r * nextIteration;
+		double indent = r + (2 * r * iteration);
 		maxPoint = d - indent;
 		double targetSquares = (((d * 2 + 1) - indent * 2) - 1) * 4;
 		diverSpread = (double)targetSquares/(double)n;
@@ -117,19 +119,24 @@ public class CoordinateCalculator {
 			currentx += diverSpread;
 		}
 		
-		nextIteration = getNextIteration();
+		callCounter += 1;
+		if (callCounter == n/2)
+		{
+			callCounter = 0;
+			nextIteration = getNextIteration(iteration);
+		}
 	}
 	
-	private static double getNextIteration()
+	private static double getNextIteration(double iteration)
 	{
 		double i;
 		if (headedIn)
 		{
-			i = nextIteration + 1;
+			i = iteration + 1;
 		}
 		else
 		{
-			i = nextIteration - 1;
+			i = iteration - 1;
 		}
 		double indent = r/2 + r * i;
 		maxPoint = d - indent;
