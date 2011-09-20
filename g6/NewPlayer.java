@@ -14,7 +14,7 @@ import java.util.Set;
 public class NewPlayer extends Player {
 	
 	private LinkedList<Node> path;
-	private Strategy myStrategy;
+	public Strategy myStrategy;
 	private LinkedList<CreatureTracker> myTracker;
 	public static final int turnAroundTimeAllowance = 7;
 	public static int dangerAvoidTravelTime = 0; // default for really happy maps
@@ -71,6 +71,10 @@ public class NewPlayer extends Player {
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
 		this.currentPath = new LinkedList<Node>();
 		initializeTracker();
+		if (getId() == 0)
+		{
+			initializeCoordinates();
+		}
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
 	}
@@ -80,6 +84,13 @@ public class NewPlayer extends Player {
 		for(int i = 0; i < n; i++) 
 			myTracker.add(new CreatureTracker(i));
 
+	}
+	
+	private void initializeCoordinates()
+	{
+		CoordinateCalculator.initCoordinateCalculator(d, r, n);
+		CoordinateCalculator.updateCoordMap();
+		CoordinateCalculator.printCoords();
 	}
 	
 	

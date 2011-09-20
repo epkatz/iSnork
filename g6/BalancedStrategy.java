@@ -13,12 +13,13 @@ public class BalancedStrategy extends Strategy {
 	public static final Point2D boatLocation = new Point2D.Double(0,0);
 
 	Point2D lastDestination;
+	int destinationId;
 	int acceptableDanger;
-	double timeBackToBoat;
 	DangerAvoidance dangerAvoid;
 	boolean stayAtBoat;
 	Node nextMove;
 	Point2D nextPosition;
+	double timeBackToBoat;
 	Random r = new Random();
 	
 
@@ -26,7 +27,6 @@ public class BalancedStrategy extends Strategy {
 			int penalty, int d, int r, int n, NewPlayer p) {
 		super(seaLifePossibilites, penalty, d, r, n, p);
 
-		timeBackToBoat = 0; // time back to boat starts at 0 because diver starts on the boat
 		acceptableDanger = 0;
 		dangerAvoid = new DangerAvoidance();
 		stayAtBoat = false;
@@ -38,6 +38,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			return Direction.STAYPUT;
 		}
+
 		if (player.currentPath.isEmpty())
 		{
 			createNextPath();
@@ -46,16 +47,26 @@ public class BalancedStrategy extends Strategy {
 		nextMove = player.currentPath.getFirst();
 		nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
 												nextMove.getDirection().getDy() + player.currentPosition.getY());
+		timeBackToBoat = (PathManager.computeDiagonalSpaces(nextPosition, boatLocation) * 3) 
+				+ (PathManager.computeAdjacentSpaces(nextPosition, boatLocation) * 2)
+				+ NewPlayer.dangerAvoidTravelTime; // computes how much time it would take to get back to the boat
+									// if I move where I'm intending to move
+
 		if (!stayAtBoat)
 		{
-			determineIfEndGame();
+			stayAtBoat = determineIfEndGame();
+			if (stayAtBoat)
+			{
+				updatePathForEndGame();
+			}
 		}
-		double timeBackToBoatFromCurrent = (PathManager.computeDiagonalSpaces(player.currentPosition, boatLocation) * 3) 
-				+ (PathManager.computeAdjacentSpaces(player.currentPosition, boatLocation) * 2);
-		
-		if (timeBackToBoatFromCurrent < player.minutesLeft - 3 && dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
+
+		if (timeBackToBoat < player.minutesLeft - 3)
 		{
-			updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
+			if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
+			{
+//				updatePathToAvoidDanger(dangerAvoid.bestDirections(player.whatISee, nextMove.getDirection(), player.currentPosition));
+			}
 		}
 
 		nextMove = player.currentPath.pop();
@@ -63,7 +74,7 @@ public class BalancedStrategy extends Strategy {
 		return nextMove.getDirection();
 	}
 
-	private void determineIfEndGame() {
+	private boolean determineIfEndGame() {
 		int travelTime = 0;
 		if (nextMove.getDirection().isDiag())
 		{
@@ -73,31 +84,51 @@ public class BalancedStrategy extends Strategy {
 		{
 			travelTime = 2;
 		}
-
-		timeBackToBoat = (PathManager.computeDiagonalSpaces(nextPosition, boatLocation) * 3) 
-				+ (PathManager.computeAdjacentSpaces(nextPosition, boatLocation) * 2)
-				+ NewPlayer.dangerAvoidTravelTime; // computes how much time it would take to get back to the boat
-									// if I move where I'm intending to move
-
+		
 		if (timeBackToBoat > player.minutesLeft - travelTime)
 		{
-			lastDestination = player.destination;
-			player.destination = boatLocation;
-			player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
-			stayAtBoat = true;
-		}
-	}
-
-	private void createNextPath() {
-		if (player.minutesLeft == 8 * 60 - 1)
-		{
-			lastDestination = boatLocation;
-			player.destination = determineInitialDestination();
+			return true;
 		}
 		else
 		{
+			return false;
+		}
+	}
+	
+	private void updatePathForEndGame()
+	{
+		lastDestination = player.destination;
+		player.destination = boatLocation;
+		player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
+	}
+
+	public void createNextPath() {
+		if (player.minutesLeft == 8 * 60 - 1)
+		{
+			lastDestination = boatLocation;
+			destinationId = player.getId();
+			player.destination = CoordinateCalculator.coordMap.get(player.getId());
+			System.out.println("Player " + player.getId() + " is heading to an initial destination of " + player.destination);
+		}
+/*		else if (something to see)
+		{
+			go to that something;
+		}*/
+		else
+		{
 //			Point2D nextDest = determineNextDestination();
-			Point2D nextDest = new Point2D.Double(r.nextInt() % (d + 1), r.nextInt() % (d + 1));
+//			Point2D nextDest = new Point2D.Double(r.nextInt() % (d + 1), r.nextInt() % (d + 1));
+			destinationId -= 1;
+			if (destinationId == n * -1)
+			{
+				destinationId = 0;
+			}
+			if (destinationId == player.getId())
+			{
+				CoordinateCalculator.updateCoordMap();
+			}
+			Point2D nextDest = CoordinateCalculator.coordMap.get(destinationId);
+			System.out.println("Player " + player.getId() + " is heading to a destination of " + player.destination);
 			lastDestination = player.destination;
 			player.destination = nextDest;
 		}
@@ -128,7 +159,7 @@ public class BalancedStrategy extends Strategy {
 		player.currentPath = newPath;
 	}
 	
-	private Point2D determineInitialDestination()
+/*	private Point2D determineInitialDestination()
 	{
 		Point2D destination = new Point2D.Double();
 		// destination determined by player id
@@ -162,7 +193,7 @@ public class BalancedStrategy extends Strategy {
 		
 //		System.out.println("Destination for player with id " + player.getId() + " is " + destination);
 		return destination;
-	}
+	}*/
 	
 	private Point2D determineNextDestination()
 	{
