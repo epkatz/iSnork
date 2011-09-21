@@ -13,107 +13,104 @@ import java.util.Set;
 
 public class DangerAvoidance {
 
-	private static final int SPACES_TO_SAFETY = 5;
-
-/*	public LinkedList<Direction> bestDirections(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
-		LinkedList<Direction> newL = new LinkedList<Direction>();
-		Random r = new Random();
-		Direction prevD = d;
-		Point2D prevP = currentPosition;
-		int end = (r.nextInt(10) + 5);
-		for (int i = 0; i < end; i++) {
-			Direction newD = getDirection(whatISee, prevD, prevP);
-			if (newD == null) {
-				ArrayList<Direction> directionOptions = Direction.allBut(prevD);
-				Direction randomDirection = null;
-				Point2D randomPoint = currentPosition;
-				do {
-					randomDirection = directionOptions.get(r.nextInt(directionOptions.size()));
-					randomPoint = getPointFromDirectionandPosition(prevP, randomDirection);
-				} while (illegalMove(randomPoint));
-				newD = randomDirection;
-			}
-			newL.add(newD);
-			prevD = newD;
-			prevP = getPointFromDirectionandPosition(prevP, newD);
+	private static final int DEPTH = 4;
+	
+	public LinkedList<Node> buildSafePath (NewPlayer p) {
+		LinkedList<Direction> dl = buildSafePath(p.whatISee, p.currentPath.peekFirst().getDirection(), p.currentPosition);
+		LinkedList<Node> l = new LinkedList<Node>();
+		for (Direction d: dl) {
+			l.add(new Node(d, p.minutesLeft));
 		}
-		return newL;
-	}*/
-
-	/* Make a direction arraylist based on best near direction */
-	public LinkedList<Node> buildSafePath(NewPlayer player) {
-		LinkedList<Node> copy = new LinkedList<Node>();
-		LinkedList<Node> path = player.currentPath;
-		copy.addAll(path);
-		Node[] nArr = new Node[SPACES_TO_SAFETY];
-		int spaces = 1;
-		for (int i = 0; i < SPACES_TO_SAFETY && !path.isEmpty(); i++) {
-			nArr[i] = path.pop();
-			spaces++;
-		}
-		LinkedList<Node> temp;
-		if (spaces < SPACES_TO_SAFETY) {
-			Point2D nextPoint = player.currentPosition;
-			Node tmpN = nArr[0];
-			for (int i = 0; i < SPACES_TO_SAFETY; i++) {
-				Node opp = getOppositeDirection(tmpN, player.minutesLeft);
-				nextPoint = getPointFromDirectionandPosition(nextPoint, opp.getDirection());
-				if (isLocationDangerous(player.whatISee, nextPoint) || illegalMove(nextPoint)) {
-					opp = goClockwise(tmpN, player.minutesLeft);
-					nextPoint = getPointFromDirectionandPosition(nextPoint, opp.getDirection());
-					if (isLocationDangerous(player.whatISee, nextPoint) || illegalMove(nextPoint)) {
-						opp = goCounterClockwise(tmpN, player.minutesLeft);
-						nextPoint = getPointFromDirectionandPosition(nextPoint, opp.getDirection());
-						if (isLocationDangerous(player.whatISee, nextPoint) || illegalMove(nextPoint)) {
-							player.myStrategy.createNextPath();
-							return player.currentPath;
-						}
-					}
-				}
-				path.add(opp);
-				tmpN = opp;
-			}
-			
-			return path;
-		} else {
-			temp = buildPathAround(player, nArr);
-			if (temp == null) {
-				player.destination = new Point2D.Double(0, 0);
-				return PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
-			}
-			return temp;
-		}
-	}
-
-	/* Build a route around the danger */
-	public LinkedList<Node> buildPathAround(NewPlayer player, Node[] nArr) {
-		LinkedList<Node> temp = new LinkedList<Node>();
-		Point2D nTurnsAway = player.currentPosition;
-		for (int i = 0; i < SPACES_TO_SAFETY; i++) {
-			nTurnsAway = getPointFromDirectionandPosition(nTurnsAway, nArr[i].getDirection());
-		}
-		return recursiveBuild(player, temp, player.currentPosition, nTurnsAway, 0);
+		return l;
 	}
 	
-	public LinkedList<Node> recursiveBuild(NewPlayer p, LinkedList<Node> l, Point2D f, Point2D t, int depth) {
-		if (depth >= 8) {
-			return null;
-		}
-		LinkedList<Node> tmpL = new LinkedList<Node>();
-		for (Direction d: Direction.values()) {
-			Point2D tmpF = getPointFromDirectionandPosition(f, d);
-			if (tmpF.equals(t) && !isLocationDangerous(p.whatISee, tmpF) && !illegalMove(tmpF)) {  
-				return l;
-			} else {
-				tmpL.add(new Node(d, p.minutesLeft));
-				recursiveBuild(p, tmpL, tmpF, t, ++depth);
-				if (tmpL != null) {
-					return tmpL;
+	public LinkedList<Direction> buildSafePath(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
+		LinkedList<Direction> newL = new LinkedList<Direction>();
+		ArrayList<Direction> directionOptions = Direction.allBut(d);
+		Direction bestDirection = null;
+		Point2D bestPoint = null;
+		for (Direction nextD : directionOptions) {
+			double newPosX = currentPosition.getX() + nextD.getDx();
+			double newPosY = currentPosition.getY() + nextD.getDy();
+			Point2D newPoint = new Point2D.Double(newPosX, newPosY);
+			if (!atTheWall(newPoint) && !isLocationDangerous(whatISee, newPoint)){
+				if (bestPoint == null){
+					bestPoint = newPoint;
+					bestDirection = nextD;
+				}
+				else{
+					if (tilesAway(currentPosition, newPoint) < tilesAway(currentPosition, bestPoint)){
+						bestPoint = newPoint;
+						bestDirection = nextD;
+					}
 				}
 			}
 		}
-		return null;
+		if (bestDirection == null){
+			Random r = new Random();
+			Direction randomDirection = directionOptions.get(r.nextInt(Direction.values().length));
+			newL.add(randomDirection);
+			double newPosX = currentPosition.getX() + randomDirection.getDx();
+			double newPosY = currentPosition.getY() + randomDirection.getDy();
+			Point2D randomPoint = new Point2D.Double(newPosX, newPosY);
+			LinkedList<Direction> temp = buildSafePath(whatISee, randomDirection, randomPoint);
+			for (Direction tmpD: temp){
+				newL.add(tmpD);
+			}
+			return newL;
+		}
+		else{
+			newL.add(bestDirection);
+			return newL;
+		}
 	}
+
+	/* Attempt 6 - DFS  
+
+	public LinkedList<Node> buildSafePath(NewPlayer player) {
+		System.out.println("FOUND DANGER!!");
+		LinkedList<Node> l = new LinkedList<Node>();
+		int depth = 0;
+		Point2D curr = player.currentPosition;
+		Point2D dest = player.destination;
+		System.out.println("I'm at " + curr + " trying to get to " + dest);
+		int tilesAway = tilesAway(curr, dest);
+		Node n = new Node(Direction.STAYPUT, player.minutesLeft);
+		n.setAssumedPoint(curr);
+		l.add(n);
+		System.out.println("Searching to depth: " + tilesAway);
+		recursive_dfs(l, depth, DEPTH, player, tilesAway);
+		l.removeFirst();
+		return l;
+	}
+
+	private boolean recursive_dfs(LinkedList<Node> l, int depth, int path, NewPlayer player, int tilesAway) {
+		boolean b = !isLocationDangerous(player.whatISee, l.peekLast().getAssumedPoint());
+		if (b && l.size() > 3) {
+			System.out.println("Made it to goal at " + player.destination);
+			return true;
+		}
+		boolean success = false;
+		Point2D currP = l.peekLast().getAssumedPoint();
+		System.out.println("New Node at: " + currP);
+		if (path > depth && !success) {
+			for (Direction nextD : getRandomDirectionArray()) {
+				Point2D nextP = getPointFromDirectionandPosition(currP, nextD);
+				if (!illegalMove(nextP)) {
+					System.out.println("Direction " + nextD + " at " + nextP + " is not an illegal move");
+					Node tmp = new Node(nextD, player.minutesLeft);
+					tmp.setAssumedPoint(nextP);
+					l.addLast(tmp);
+					System.out.println("depth is " + depth + " can go " + (path - depth) + " further");
+					success = recursive_dfs(l, depth + 1, path, player, tilesAway);
+					if (success) {
+						return success;
+					}
+				}
+			}
+		}
+		return false;
+	}*/
 
 	/* get the opposite direction */
 	public Node getOppositeDirection(Node n, int minuteCreated) {
@@ -139,7 +136,7 @@ public class DangerAvoidance {
 				return new Node(Direction.STAYPUT, minuteCreated);
 		}
 	}
-	
+
 	/* get the clockwise direction */
 	public Node goClockwise(Node n, int minuteCreated) {
 		int deg = n.getDirection().getDegrees();
@@ -164,7 +161,7 @@ public class DangerAvoidance {
 				return new Node(Direction.STAYPUT, minuteCreated);
 		}
 	}
-	
+
 	/* get the opposite direction */
 	public Node goCounterClockwise(Node n, int minuteCreated) {
 		int deg = n.getDirection().getDegrees();
@@ -189,14 +186,55 @@ public class DangerAvoidance {
 				return new Node(Direction.STAYPUT, minuteCreated);
 		}
 	}
+	
+	public ArrayList<Direction> getRandomDirectionArray() {
+		ArrayList<Direction> arrL = Direction.allBut(Direction.STAYPUT);
+		try {
+		Random r = new Random();
+			for (int i = 0; i < 7; i++) {
+				int first = r.nextInt(arrL.size());
+				int second = r.nextInt(arrL.size());
+				Direction d = arrL.get(first);
+				arrL.set(first, arrL.get(second));
+				arrL.set(second, d);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return arrL;
+	}
 
 	/* Is a point on the board dangerous? */
 	public boolean isLocationDangerous(Set<Observation> whatISee, Point2D pos) {
 		Iterator<Observation> itr = whatISee.iterator();
 		while (itr.hasNext()) {
 			Observation o = itr.next();
-			if (o.isDangerous()) {
-				if (tilesAway(pos, o.getLocation()) <= 3) {
+			if (o.isDangerous() && o.getLocation().distance(pos) <= 2) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public double getDanger(Set<Observation> whatISee, Point2D pos) {
+		double danger = 0;
+		Iterator<Observation> itr = whatISee.iterator();
+		while (itr.hasNext()) {
+			Observation o = itr.next();
+			if (o.isDangerous() && o.getLocation().distance(pos) <= 2) {
+				danger += o.happiness() * 2;
+			}
+		}
+		return danger;
+	}
+
+	public boolean constantDanger(Set<Observation> whatISee, Point2D pos) {
+		Iterator<Observation> itr = whatISee.iterator();
+		while (itr.hasNext()) {
+			Observation o = itr.next();
+			if (o.isDangerous() && o.getDirection().equals(Direction.STAYPUT)) {
+				if (tilesAway(pos, o.getLocation()) <= 2) {
 					return true;
 				}
 			}
