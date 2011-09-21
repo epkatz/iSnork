@@ -3,6 +3,7 @@ package isnork.g6;
 
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
+import isnork.sim.Player;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -15,14 +16,107 @@ public class DangerAvoidance {
 
 	private static final int DEPTH = 4;
 	
-	public LinkedList<Node> buildSafePath (NewPlayer p) {
+	private static final int EAST = 0;
+	private static final int NORTHEAST = 45;
+	private static final int NORTH = 90;
+	private static final int NORTHWEST = 135;
+	private static final int WEST = 180;
+	private static final int SOUTHWEST = 225;
+	private static final int SOUTH = 270;
+	private static final int SOUTHEAST = 315;
+	
+	public LinkedList<Node> buildSafePath(NewPlayer p) {
+		LinkedList<Node> l = new LinkedList<Node>();
+		Set<Observation> whatISee = p.whatISee;
+		Point2D currentPosition = p.currentPosition;
+		int m = p.minutesLeft;
+		Node n = p.currentPath.peek();
+
+		//Go AdjancetCounterClockWise
+		Node nextD = goAdjacentCounterClockwise(n, m);
+		Point2D pnt = pointFromCurrPandDir(currentPosition, nextD.getDirection());
+		if (!isLocationDangerous(whatISee, pnt)) {
+			l.add(nextD);
+			l.add(nextD);
+			l.add(nextD);
+			p.currentPath.removeFirst();
+			Node lst = getOppositeDirection(nextD, m);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			return l;
+		}
+		//GO AdjancetClockWise
+		nextD = goAdjacentClockwise(n, m);
+		pnt = pointFromCurrPandDir(currentPosition, nextD.getDirection());
+		if (!isLocationDangerous(whatISee, pnt)) {
+			l.add(nextD);
+			l.add(nextD);
+			l.add(nextD);
+			p.currentPath.removeFirst();
+			Node lst = getOppositeDirection(nextD, m);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			return l;
+		}
+		//GO CounterClockWise
+		nextD = goCounterClockwise(n, m);
+		pnt = pointFromCurrPandDir(currentPosition, nextD.getDirection());
+		if (!isLocationDangerous(whatISee, pnt)) {
+			l.add(nextD);
+			l.add(nextD);
+			l.add(nextD);
+			p.currentPath.removeFirst();
+			Node lst = getOppositeDirection(nextD, m);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			return l;
+		}
+		//Go ClockWise
+		nextD = goClockwise(n, m);
+		pnt = pointFromCurrPandDir(currentPosition, nextD.getDirection());
+		if (!isLocationDangerous(whatISee, pnt)) {
+			l.add(nextD);
+			l.add(nextD);
+			l.add(nextD);
+			p.currentPath.removeFirst();
+			Node lst = getOppositeDirection(nextD, m);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			return l;
+		}
+		//Go Opposite
+		nextD = getOppositeDirection(n, m);
+		pnt = pointFromCurrPandDir(currentPosition, nextD.getDirection());
+		if (!isLocationDangerous(whatISee, pnt)) {
+			l.add(nextD);
+			l.add(nextD);
+			l.add(nextD);
+			p.currentPath.removeFirst();
+			Node lst = getOppositeDirection(nextD, m);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			p.currentPath.addLast(lst);
+			return l;
+		}
+		//Keep going the way you are
+		l.addFirst(n);
+		p.currentPath.removeFirst();
+		return l;
+	}
+	
+	
+	/*public LinkedList<Node> buildSafePath (NewPlayer p) {
 		LinkedList<Direction> dl = buildSafePath(p.whatISee, p.currentPath.peekFirst().getDirection(), p.currentPosition);
 		LinkedList<Node> l = new LinkedList<Node>();
 		for (Direction d: dl) {
 			l.add(new Node(d, p.minutesLeft));
 		}
 		return l;
-	}
+	}*/
 	
 	public LinkedList<Direction> buildSafePath(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
 		LinkedList<Direction> newL = new LinkedList<Direction>();
@@ -112,76 +206,121 @@ public class DangerAvoidance {
 		return false;
 	}*/
 
-	/* get the opposite direction */
 	public Node getOppositeDirection(Node n, int minuteCreated) {
 		int deg = n.getDirection().getDegrees();
 		switch (deg) {
-			case 0:
+			case EAST:
 				return new Node(Direction.W, minuteCreated);
-			case 180:
+			case WEST:
 				return new Node(Direction.E, minuteCreated);
-			case 90:
+			case NORTH:
 				return new Node(Direction.S, minuteCreated);
-			case 270:
+			case SOUTH:
 				return new Node(Direction.N, minuteCreated);
-			case 45:
+			case NORTHEAST:
 				return new Node(Direction.SW, minuteCreated);
-			case 225:
+			case SOUTHWEST:
 				return new Node(Direction.NE, minuteCreated);
-			case 135:
+			case NORTHWEST:
 				return new Node(Direction.SE, minuteCreated);
-			case 315:
+			case SOUTHEAST:
 				return new Node(Direction.NW, minuteCreated);
 			default:
 				return new Node(Direction.STAYPUT, minuteCreated);
 		}
 	}
 
-	/* get the clockwise direction */
 	public Node goClockwise(Node n, int minuteCreated) {
 		int deg = n.getDirection().getDegrees();
 		switch (deg) {
-			case 0:
-				return new Node(Direction.N, minuteCreated);
-			case 180:
+			case EAST:
 				return new Node(Direction.S, minuteCreated);
-			case 90:
-				return new Node(Direction.W, minuteCreated);
-			case 270:
+			case WEST:
+				return new Node(Direction.N, minuteCreated);
+			case NORTH:
 				return new Node(Direction.E, minuteCreated);
-			case 45:
+			case SOUTH:
+				return new Node(Direction.W, minuteCreated);
+			case NORTHEAST:
 				return new Node(Direction.SE, minuteCreated);
-			case 225:
+			case SOUTHWEST:
 				return new Node(Direction.NW, minuteCreated);
-			case 135:
+			case NORTHWEST:
 				return new Node(Direction.NE, minuteCreated);
-			case 315:
+			case SOUTHEAST:
 				return new Node(Direction.SW, minuteCreated);
 			default:
 				return new Node(Direction.STAYPUT, minuteCreated);
 		}
 	}
-
-	/* get the opposite direction */
+	
 	public Node goCounterClockwise(Node n, int minuteCreated) {
 		int deg = n.getDirection().getDegrees();
 		switch (deg) {
-			case 0:
-				return new Node(Direction.S, minuteCreated);
-			case 180:
+			case EAST:
 				return new Node(Direction.N, minuteCreated);
-			case 90:
-				return new Node(Direction.E, minuteCreated);
-			case 270:
+			case WEST:
+				return new Node(Direction.S, minuteCreated);
+			case NORTH:
 				return new Node(Direction.W, minuteCreated);
-			case 45:
+			case SOUTH:
+				return new Node(Direction.E, minuteCreated);
+			case NORTHEAST:
 				return new Node(Direction.NW, minuteCreated);
-			case 225:
+			case SOUTHWEST:
 				return new Node(Direction.SE, minuteCreated);
-			case 135:
+			case NORTHWEST:
 				return new Node(Direction.SW, minuteCreated);
-			case 315:
+			case SOUTHEAST:
 				return new Node(Direction.NE, minuteCreated);
+			default:
+				return new Node(Direction.STAYPUT, minuteCreated);
+		}
+	}
+	
+	public Node goAdjacentCounterClockwise(Node n, int minuteCreated) {
+		int deg = n.getDirection().getDegrees();
+		switch (deg) {
+			case EAST:
+				return new Node(Direction.NE, minuteCreated);
+			case WEST:
+				return new Node(Direction.SW, minuteCreated);
+			case NORTH:
+				return new Node(Direction.NW, minuteCreated);
+			case SOUTH:
+				return new Node(Direction.SE, minuteCreated);
+			case NORTHEAST:
+				return new Node(Direction.N, minuteCreated);
+			case SOUTHWEST:
+				return new Node(Direction.S, minuteCreated);
+			case NORTHWEST:
+				return new Node(Direction.W, minuteCreated);
+			case SOUTHEAST:
+				return new Node(Direction.E, minuteCreated);
+			default:
+				return new Node(Direction.STAYPUT, minuteCreated);
+		}
+	}
+	
+	public Node goAdjacentClockwise(Node n, int minuteCreated) {
+		int deg = n.getDirection().getDegrees();
+		switch (deg) {
+			case EAST:
+				return new Node(Direction.SE, minuteCreated);
+			case WEST:
+				return new Node(Direction.NW, minuteCreated);
+			case NORTH:
+				return new Node(Direction.NE, minuteCreated);
+			case SOUTH:
+				return new Node(Direction.SW, minuteCreated);
+			case NORTHEAST:
+				return new Node(Direction.E, minuteCreated);
+			case SOUTHWEST:
+				return new Node(Direction.W, minuteCreated);
+			case NORTHWEST:
+				return new Node(Direction.N, minuteCreated);
+			case SOUTHEAST:
+				return new Node(Direction.S, minuteCreated);
 			default:
 				return new Node(Direction.STAYPUT, minuteCreated);
 		}
@@ -246,7 +385,7 @@ public class DangerAvoidance {
 	public Direction getDirection(Set<Observation> whatISee, Direction d, Point2D currentPosition) {
 		ArrayList<Direction> directionOptions = Direction.allBut(d);
 		for (Direction nextD : directionOptions) {
-			Point2D newPoint = getPointFromDirectionandPosition(currentPosition, nextD);
+			Point2D newPoint = pointFromCurrPandDir(currentPosition, nextD);
 			if (!illegalMove(newPoint) && !isLocationDangerous(whatISee, newPoint)) {
 				if (!(nextD.getDx() == 0 && nextD.getDy() == 0)) {
 					return nextD;
@@ -257,7 +396,7 @@ public class DangerAvoidance {
 	}
 
 	/* get a point from the direction you're going and current position */
-	private Point2D getPointFromDirectionandPosition(Point2D currentPosition, Direction nextD) {
+	private Point2D pointFromCurrPandDir(Point2D currentPosition, Direction nextD) {
 		double newPosX = currentPosition.getX() + nextD.getDx();
 		double newPosY = currentPosition.getY() + nextD.getDy();
 		Point2D newPoint = new Point2D.Double(newPosX, newPosY);
