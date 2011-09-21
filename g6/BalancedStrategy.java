@@ -65,7 +65,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 			{
-//				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
+				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
 			}
 		}
 
