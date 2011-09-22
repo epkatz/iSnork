@@ -72,6 +72,75 @@ public class PathManager {
 		return path;
 	}
 	
+	public static LinkedList<Node> buildOrthogonalPath(Point2D current, Point2D destination, int minutesLeft)
+	{
+		LinkedList<Node> path = new LinkedList<Node>();
+//		System.out.println("Building path from " + current + " to " + destination);
+		double deltax = destination.getX() - current.getX();
+		double deltay = destination.getY() - current.getY();
+		
+		if (destination.distance(current) == 0)
+		{
+			path.add(new Node(Direction.STAYPUT, minutesLeft));
+		}
+		
+		if (deltax >= 0 && deltay >= 0)
+		{
+			while (deltay > 0)
+			{
+				path.add(new Node(Direction.S, minutesLeft));
+				--deltay;
+			}
+			while (deltax > 0)
+			{
+				path.add(new Node(Direction.E, minutesLeft));
+				--deltax;
+			}
+		}
+		else if (deltax >= 0 && deltay <= 0)
+		{
+			while (deltax > 0)
+			{
+				path.add(new Node(Direction.E, minutesLeft));
+				--deltax;
+			}
+			while (deltay < 0)
+			{
+				path.add(new Node(Direction.N, minutesLeft));
+				++deltay;
+			}
+		}
+		else if (deltax <= 0 && deltay >= 0)
+		{
+			while (deltax < 0)
+			{
+				path.add(new Node(Direction.W, minutesLeft));
+				++deltax;
+			}
+			while (deltay > 0)
+			{
+				path.add(new Node(Direction.S, minutesLeft));
+				--deltay;
+			}
+		}
+		else if (deltax <= 0 && deltay <= 0)
+		{
+			while (deltay < 0)
+			{
+				path.add(new Node(Direction.N, minutesLeft));
+				++deltay;
+			}
+			while (deltax < 0)
+			{
+				path.add(new Node(Direction.W, minutesLeft));
+				++deltax;
+			}
+		}
+		
+//		System.out.println("Returning path of length " + path.size());
+		return path;
+	}
+	
 	public static double computeDiagonalSpaces(Point2D from, Point2D to)
 	{
 		double deltax = Math.abs(from.getX() - to.getX());

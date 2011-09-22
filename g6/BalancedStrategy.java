@@ -1,6 +1,11 @@
 package isnork.g6;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
@@ -14,6 +19,7 @@ public class BalancedStrategy extends Strategy {
 
 	Point2D lastDestination;
 	int destinationId;
+	LinkedList<Destination> possibleDestinations;
 	int acceptableDanger;
 	DangerAvoidance dangerAvoid;
 	boolean stayAtBoat;
@@ -28,8 +34,11 @@ public class BalancedStrategy extends Strategy {
 		super(seaLifePossibilites, penalty, d, r, n, p);
 
 		acceptableDanger = 0;
+		destinationId = 100;
 		dangerAvoid = new DangerAvoidance();
 		stayAtBoat = false;
+		possibleDestinations = new LinkedList<Destination>();
+		player.currentPath.add(new Node(Direction.STAYPUT, player.minutesLeft));
 	}
 
 	@Override
@@ -38,12 +47,33 @@ public class BalancedStrategy extends Strategy {
 		{
 			return Direction.STAYPUT;
 		}
-
-		if (player.currentPath.isEmpty())
+		
+		if (CoordinateCalculator.getLoadSpiralDestinations())
 		{
-			createNextPath();
+			addSpiralDataToDestinations();
 		}
-			
+		else if (possibleDestinations.isEmpty())
+		{
+			CoordinateCalculator.updateCoordMap();
+			addSpiralDataToDestinations();
+		}
+
+		
+		if (player.destination == null || player.currentPosition.distance(player.destination) == 0 || player.currentPath.isEmpty())
+		{
+			Destination nextDest = possibleDestinations.pop();
+			player.destination = nextDest.getDestination();
+			if(nextDest.getId() <= 0 && destinationId <= 0)
+			{
+				player.currentPath = PathManager.buildOrthogonalPath(player.currentPosition, player.destination, player.minutesLeft);
+			}
+			else
+			{
+				player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
+			}
+			destinationId = nextDest.getId();
+		}
+		
 		nextMove = player.currentPath.getFirst();
 		nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
 												nextMove.getDirection().getDy() + player.currentPosition.getY());
@@ -65,13 +95,28 @@ public class BalancedStrategy extends Strategy {
 		{
 			if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 			{
-				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
+//				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
 			}
 		}
 
 		nextMove = player.currentPath.pop();
-//		System.out.println("Returning Direction " + nextMove.getDirection());
-		return nextMove.getDirection();
+		if (validDirection(nextMove.getDirection()))
+		{
+			return nextMove.getDirection();
+		}
+		else
+		{
+			return Direction.STAYPUT;
+		}
+	}
+	
+	private boolean validDirection(Direction d)
+	{
+		//TODO: Make more robust
+		if (d == null)
+			return false;
+		else
+			return true;
 	}
 
 	private boolean determineIfEndGame() {
@@ -97,28 +142,27 @@ public class BalancedStrategy extends Strategy {
 	
 	private void updatePathForEndGame()
 	{
-		lastDestination = player.destination;
 		player.destination = boatLocation;
 		player.currentPath = PathManager.buildPath(player.currentPosition, boatLocation, player.minutesLeft);
 	}
 
-	public void createNextPath() {
-		if (player.minutesLeft == 8 * 60 - 1)
+//	public void createNextPath() {
+/*		if (player.minutesLeft == 8 * 60 - 1)
 		{
 			lastDestination = boatLocation;
 			destinationId = player.getId();
 			player.destination = CoordinateCalculator.coordMap.get(player.getId());
 			System.out.println("Player " + player.getId() + " is heading to an initial destination of " + player.destination);
-		}
+		}*/
 /*		else if (something to see)
 		{
 			go to that something;
 		}*/
-		else
-		{
+/*		else
+		{*/
 //			Point2D nextDest = determineNextDestination();
 //			Point2D nextDest = new Point2D.Double(r.nextInt() % (d + 1), r.nextInt() % (d + 1));
-			destinationId -= 1;
+/*			destinationId -= 1;
 			if (destinationId == n * -1)
 			{
 				destinationId = 0;
@@ -133,7 +177,7 @@ public class BalancedStrategy extends Strategy {
 			player.destination = nextDest;
 		}
 		player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
-	}
+	}*/
 	
 	private void updatePathToAvoidDanger(LinkedList<Node> safePath)
 	{
@@ -155,6 +199,38 @@ public class BalancedStrategy extends Strategy {
 		safePath.addAll(directPath);
 		
 		player.currentPath = safePath;
+	}
+	
+	private void addSpiralDataToDestinations()
+	{
+		Collection<Destination> toRemove = new ArrayList<Destination>();
+		for (Destination d : possibleDestinations)
+		{
+			if (d.getPriority() <= 0)
+			{
+				toRemove.add(d);
+			}
+		}
+		possibleDestinations.removeAll(toRemove);
+				
+		int i = player.getId();
+		possibleDestinations.add(CoordinateCalculator.coordMap.get(i));
+		--i;
+		if (i <= n * -1)
+		{
+			i = 0;
+		}
+
+		while (i != player.getId())
+		{
+			Destination d = CoordinateCalculator.coordMap.get(i);
+			possibleDestinations.add(d);
+			--i;
+			if (i <= n * -1)
+			{
+				i = 0;
+			}
+		}
 	}
 	
 /*	private Point2D determineInitialDestination()

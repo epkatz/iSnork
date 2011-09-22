@@ -68,8 +68,9 @@ public class NewPlayer extends Player {
 		
 		minutesLeft = 8 * 60;
 		assignTravelTimeAllowance();
-		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
 		this.currentPath = new LinkedList<Node>();
+		destination = null;
+		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
 		initializeTracker();
 		if (getId() == 0)
 		{
@@ -89,7 +90,7 @@ public class NewPlayer extends Player {
 	private void initializeCoordinates()
 	{
 		CoordinateCalculator.initCoordinateCalculator(d, r, n);
-		CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
+		CoordinateCalculator.updateCoordMap();
 		CoordinateCalculator.printCoords();
 	}
 	

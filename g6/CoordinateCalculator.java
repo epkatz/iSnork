@@ -4,15 +4,17 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 
 public class CoordinateCalculator {
-	public static HashMap<Integer, Point2D> coordMap;
+	public static HashMap<Integer, Destination> coordMap;
 	public static int d;
 	public static int r;
 	public static int n;
 	static double diverSpread;
 	static double maxPoint;
-	static double nextIteration;
+	static double indent;
 	static boolean headedIn;
 	static int callCounter;
+	private static boolean loadSpiralDestinations;
+
 	
 	public static void initCoordinateCalculator(int d, int r, int n)
 	{
@@ -20,19 +22,35 @@ public class CoordinateCalculator {
 		CoordinateCalculator.r = r;
 		CoordinateCalculator.n = n;
 		
-		nextIteration = 0;
+		indent = r;
 		callCounter = 0;
 		headedIn = true;
-		coordMap = new HashMap<Integer, Point2D>();
+		coordMap = new HashMap<Integer, Destination>();
 		for (int i = 0; i > n * -1; --i)
 		{
-			coordMap.put(i, new Point2D.Double());
+			coordMap.put(i, new Destination(new Point2D.Double(), 0, i));
 		}
 	}
 	
-	public static void updateCoordMap(double iteration)
+	public static boolean getLoadSpiralDestinations()
 	{
-		double indent = r + (2 * r * iteration);
+		if (loadSpiralDestinations)
+		{
+			if (++callCounter == n)
+			{
+				callCounter = 0;
+				loadSpiralDestinations = false;
+				System.out.println("Everyone has updated their queues");
+				return true;
+			}
+		}
+		return loadSpiralDestinations;
+	}
+	
+	public static void updateCoordMap()
+	{
+		loadSpiralDestinations = true;
+
 		maxPoint = d - indent;
 		double targetSquares = (((d * 2 + 1) - indent * 2) - 1) * 4;
 		diverSpread = (double)targetSquares/(double)n;
@@ -42,7 +60,7 @@ public class CoordinateCalculator {
 		/* start to top right corner */
 		while(currentx <= maxPoint && i > n * -1)
 		{
-			coordMap.get(i).setLocation(Math.round(currentx), Math.round(currenty));
+			coordMap.get(i).getDestination().setLocation(Math.round(currentx), Math.round(currenty));
 			--i;
 			currentx += diverSpread;
 		}
@@ -60,7 +78,7 @@ public class CoordinateCalculator {
 		/* top right to bottom right */
 		while(currenty >= -1 * maxPoint && i > n * -1)
 		{
-			coordMap.get(i).setLocation(Math.round(currentx), Math.round(currenty));
+			coordMap.get(i).getDestination().setLocation(Math.round(currentx), Math.round(currenty));
 			--i;
 			currenty -= diverSpread;
 		}
@@ -78,7 +96,7 @@ public class CoordinateCalculator {
 		/* bottom right to bottom left */
 		while(currentx >= -1 * maxPoint && i > n * -1)
 		{
-			coordMap.get(i).setLocation(Math.round(currentx), Math.round(currenty));
+			coordMap.get(i).getDestination().setLocation(Math.round(currentx), Math.round(currenty));
 			--i;
 			currentx -= diverSpread;
 		}
@@ -96,7 +114,7 @@ public class CoordinateCalculator {
 		/* bottom left to top left */
 		while(currenty <= maxPoint && i > n * -1)
 		{
-			coordMap.get(i).setLocation(Math.round(currentx), Math.round(currenty));
+			coordMap.get(i).getDestination().setLocation(Math.round(currentx), Math.round(currenty));
 			--i;
 			currenty += diverSpread;
 		}
@@ -114,51 +132,42 @@ public class CoordinateCalculator {
 		/* top left to start */
 		while (currentx < 0 && i > n * -1)
 		{
-			coordMap.get(i).setLocation(Math.round(currentx), Math.round(currenty));
+			coordMap.get(i).getDestination().setLocation(Math.round(currentx), Math.round(currenty));
 			--i;
 			currentx += diverSpread;
 		}
 		
-		callCounter += 1;
-		if (callCounter == n/2)
-		{
-			callCounter = 0;
-			nextIteration = getNextIteration(iteration);
-		}
+		getNextIteration();
 	}
 	
-	private static double getNextIteration(double iteration)
+	private static void getNextIteration()
 	{
-		double i;
 		if (headedIn)
 		{
-			i = iteration + 1;
+			indent += ((r * 3) / 2);
 		}
 		else
 		{
-			i = iteration - 1;
+			indent -= ((r * 3) / 2);
 		}
-		double indent = r/2 + r * i;
 		maxPoint = d - indent;
-		if (maxPoint < r/2)
+		if (indent < r)
 		{
-			i -= 1.5;
-			headedIn = false;
-		}
-		else if (maxPoint > d - r/2)
-		{
-			i += 1;
 			headedIn = true;
+			indent = r;
 		}
-		
-		return i;
+		else if (maxPoint < r)
+		{
+			headedIn = false;
+			indent = r;
+		}
 	}
 	
 	public static void printCoords()
 	{
 		for (int i = 0; i > n * -1; --i)
 		{
-			System.out.println("Key: " + i + " Point: " + coordMap.get(i));
+			System.out.println("Key: " + i + " Point: " + coordMap.get(i).getDestination() + " Priority: " + coordMap.get(i).getPriority());
 		}
 	}
 	

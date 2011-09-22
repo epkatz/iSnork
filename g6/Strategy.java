@@ -26,6 +26,6 @@ public abstract class Strategy {
 	
 	public abstract Direction nextMove();
 	
-	public abstract void createNextPath();
+//	public abstract void createNextPath();
 		
 }
