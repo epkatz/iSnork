@@ -6,12 +6,14 @@ public class Destination implements Comparable<Destination> {
 	private Point2D destination;
 	private int priority;
 	private int id;
+	private boolean isStatic;
 	
-	public Destination(Point2D destination, int priority, int id)
+	public Destination(Point2D destination, int priority, int id, boolean isStatic)
 	{
 		this.destination = destination;
 		this.priority = priority;
 		this.id = id;
+		this.isStatic = isStatic;
 	}
 	
 	public Point2D getDestination()
@@ -33,10 +35,9 @@ public class Destination implements Comparable<Destination> {
 	
 	public void decrementPriority()
 	{
-		priority -= 1;
-		if (priority < 0)
+		if (!isStatic)
 		{
-			priority = 0;
+			priority -= 1;
 		}
 	}
 

@@ -28,7 +28,7 @@ public class CoordinateCalculator {
 		coordMap = new HashMap<Integer, Destination>();
 		for (int i = 0; i > n * -1; --i)
 		{
-			coordMap.put(i, new Destination(new Point2D.Double(), 0, i));
+			coordMap.put(i, new Destination(new Point2D.Double(), 0, i, true));
 		}
 	}
 	

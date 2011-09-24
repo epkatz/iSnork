@@ -18,6 +18,7 @@ public class NewPlayer extends Player {
 	private LinkedList<Node> path;
 	public Strategy myStrategy;
 	private LinkedList<CreatureTracker> myTracker;
+	public LinkedList<Destination> possibleDestinations;
 	public static final int turnAroundTimeAllowance = 7;
 	public static int dangerAvoidTravelTime = 0; // default for really happy maps
 //TODO: initialize dangerAvoidTravelTime when determining how dangerous the board is
@@ -71,12 +72,9 @@ public class NewPlayer extends Player {
 		minutesLeft = 8 * 60;
 		assignTravelTimeAllowance();
 		this.currentPath = new LinkedList<Node>();
-<<<<<<< HEAD
 		destination = null;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
-=======
 		iSnorkDecode decoder; //used to map the char associated to a creature
->>>>>>> Added iSnork Decoder
 		initializeTracker();
 		if (getId() == 0)
 		{
@@ -99,13 +97,10 @@ public class NewPlayer extends Player {
 	private void initializeCoordinates()
 	{
 		CoordinateCalculator.initCoordinateCalculator(d, r, n);
-<<<<<<< HEAD
 		CoordinateCalculator.updateCoordMap();
 		CoordinateCalculator.printCoords();
-=======
-		CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
+//		CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
 		//CoordinateCalculator.printCoords();
->>>>>>> Added iSnork Decoder
 	}
 
 	private CreatureTracker getWhatPlayerSaw(int id) {

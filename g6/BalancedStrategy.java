@@ -19,7 +19,6 @@ public class BalancedStrategy extends Strategy {
 
 	Point2D lastDestination;
 	int destinationId;
-	LinkedList<Destination> possibleDestinations;
 	int acceptableDanger;
 	DangerAvoidance dangerAvoid;
 	boolean stayAtBoat;
@@ -37,7 +36,7 @@ public class BalancedStrategy extends Strategy {
 		destinationId = 100;
 		dangerAvoid = new DangerAvoidance();
 		stayAtBoat = false;
-		possibleDestinations = new LinkedList<Destination>();
+		player.possibleDestinations = new LinkedList<Destination>();
 		player.currentPath.add(new Node(Direction.STAYPUT, player.minutesLeft));
 	}
 
@@ -52,7 +51,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			addSpiralDataToDestinations();
 		}
-		else if (possibleDestinations.isEmpty())
+		else if (player.possibleDestinations.isEmpty())
 		{
 			CoordinateCalculator.updateCoordMap();
 			addSpiralDataToDestinations();
@@ -61,7 +60,7 @@ public class BalancedStrategy extends Strategy {
 		
 		if (player.destination == null || player.currentPosition.distance(player.destination) == 0 || player.currentPath.isEmpty())
 		{
-			Destination nextDest = possibleDestinations.pop();
+			Destination nextDest = player.possibleDestinations.pop();
 			player.destination = nextDest.getDestination();
 			if(nextDest.getId() <= 0 && destinationId <= 0)
 			{
@@ -204,17 +203,17 @@ public class BalancedStrategy extends Strategy {
 	private void addSpiralDataToDestinations()
 	{
 		Collection<Destination> toRemove = new ArrayList<Destination>();
-		for (Destination d : possibleDestinations)
+		for (Destination d : player.possibleDestinations)
 		{
 			if (d.getPriority() <= 0)
 			{
 				toRemove.add(d);
 			}
 		}
-		possibleDestinations.removeAll(toRemove);
+		player.possibleDestinations.removeAll(toRemove);
 				
 		int i = player.getId();
-		possibleDestinations.add(CoordinateCalculator.coordMap.get(i));
+		player.possibleDestinations.add(CoordinateCalculator.coordMap.get(i));
 		--i;
 		if (i <= n * -1)
 		{
@@ -224,7 +223,7 @@ public class BalancedStrategy extends Strategy {
 		while (i != player.getId())
 		{
 			Destination d = CoordinateCalculator.coordMap.get(i);
-			possibleDestinations.add(d);
+			player.possibleDestinations.add(d);
 			--i;
 			if (i <= n * -1)
 			{
