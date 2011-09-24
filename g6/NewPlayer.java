@@ -1,6 +1,8 @@
 package isnork.g6;
 
+import java.util.Iterator;
 import isnork.sim.GameObject.Direction;
+
 import isnork.sim.Observation;
 import isnork.sim.Player;
 import isnork.sim.SeaLifePrototype;
@@ -69,12 +71,19 @@ public class NewPlayer extends Player {
 		minutesLeft = 8 * 60;
 		assignTravelTimeAllowance();
 		this.currentPath = new LinkedList<Node>();
+<<<<<<< HEAD
 		destination = null;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
+=======
+		iSnorkDecode decoder; //used to map the char associated to a creature
+>>>>>>> Added iSnork Decoder
 		initializeTracker();
 		if (getId() == 0)
 		{
 			initializeCoordinates();
+			decoder = new iSnorkDecode(seaLifePossibilites);
+			//print out the dictionary
+			decoder.printDecodedList();
 		}
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
@@ -82,7 +91,7 @@ public class NewPlayer extends Player {
 	
 	private void initializeTracker() {
 		myTracker = new LinkedList<CreatureTracker>();
-		for(int i = 0; i < n; i++) 
+		for(int i = 0; i < n; i++)
 			myTracker.add(new CreatureTracker(i));
 
 	}
@@ -90,13 +99,15 @@ public class NewPlayer extends Player {
 	private void initializeCoordinates()
 	{
 		CoordinateCalculator.initCoordinateCalculator(d, r, n);
+<<<<<<< HEAD
 		CoordinateCalculator.updateCoordMap();
 		CoordinateCalculator.printCoords();
+=======
+		CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
+		//CoordinateCalculator.printCoords();
+>>>>>>> Added iSnork Decoder
 	}
-	
-	
-		
-	
+
 	private CreatureTracker getWhatPlayerSaw(int id) {
 		//make id positive
 		if(id < 0) id *= -1;
@@ -114,7 +125,7 @@ public class NewPlayer extends Player {
 		
 		//**uncomment lines for debuggin and printing tracker list to the console
 		CreatureTracker creatureTracker = getWhatPlayerSaw(getId());
-		int id = getId() * -1; //make positive
+		int id = getId(); //make positive
 		//creatureTracker.printListOfSeenCreatures();
 		for(Object obj : whatISee) {
 			Observation creature = (Observation)obj;
@@ -129,6 +140,7 @@ public class NewPlayer extends Player {
 		}
 		
 	}
+	
 	
 	@Override
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
@@ -197,6 +209,7 @@ public class NewPlayer extends Player {
 		else 
 			return Risk.EVEN;
 	}
+	
 	
 	public Level getLevel(boolean isDangerous){
 		int tiles = getNumTiles();
