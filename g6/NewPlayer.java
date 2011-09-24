@@ -1,6 +1,10 @@
 package isnork.g6;
 
+import java.util.Iterator;
+
+import isnork.g6.iSnorkDecode.Creature;
 import isnork.sim.GameObject.Direction;
+
 import isnork.sim.Observation;
 import isnork.sim.Player;
 import isnork.sim.SeaLifePrototype;
@@ -16,6 +20,11 @@ public class NewPlayer extends Player {
 	private LinkedList<Node> path;
 	public Strategy myStrategy;
 	private LinkedList<CreatureTracker> myTracker;
+<<<<<<< HEAD
+=======
+	public iSnorkDecode decoder;
+>>>>>>> filtered iSnork decode
+	public LinkedList<Destination> possibleDestinations;
 	public static final int turnAroundTimeAllowance = 7;
 	public static int dangerAvoidTravelTime = 0; // default for really happy maps
 //TODO: initialize dangerAvoidTravelTime when determining how dangerous the board is
@@ -71,10 +80,17 @@ public class NewPlayer extends Player {
 		this.currentPath = new LinkedList<Node>();
 		destination = null;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
+<<<<<<< HEAD
+		iSnorkDecode decoder; //used to map the char associated to a creature
+=======
+>>>>>>> filtered iSnork decode
 		initializeTracker();
 		if (getId() == 0)
 		{
 			initializeCoordinates();
+			decoder = new iSnorkDecode(seaLifePossibilites);
+			//print out the dictionary
+			decoder.printDecodedList();
 		}
 		//int dangerIndex = getBoardDanger();
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
@@ -82,7 +98,7 @@ public class NewPlayer extends Player {
 	
 	private void initializeTracker() {
 		myTracker = new LinkedList<CreatureTracker>();
-		for(int i = 0; i < n; i++) 
+		for(int i = 0; i < n; i++)
 			myTracker.add(new CreatureTracker(i));
 
 	}
@@ -92,11 +108,10 @@ public class NewPlayer extends Player {
 		CoordinateCalculator.initCoordinateCalculator(d, r, n);
 		CoordinateCalculator.updateCoordMap();
 		CoordinateCalculator.printCoords();
+//		CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
+		//CoordinateCalculator.printCoords();
 	}
-	
-	
-		
-	
+
 	private CreatureTracker getWhatPlayerSaw(int id) {
 		//make id positive
 		if(id < 0) id *= -1;
@@ -114,7 +129,7 @@ public class NewPlayer extends Player {
 		
 		//**uncomment lines for debuggin and printing tracker list to the console
 		CreatureTracker creatureTracker = getWhatPlayerSaw(getId());
-		int id = getId() * -1; //make positive
+		int id = getId(); //make positive
 		//creatureTracker.printListOfSeenCreatures();
 		for(Object obj : whatISee) {
 			Observation creature = (Observation)obj;
@@ -130,6 +145,16 @@ public class NewPlayer extends Player {
 		
 	}
 	
+	//check if creature seen is top 26 highest before sending message
+	private boolean isCreatureInDecoder(String creatureName) {
+		for(Creature obj : decoder.getCreatureList()) {
+			if(obj.getName() == creatureName)
+				return true;
+		}
+		return false;
+	}
+	
+	
 	@Override
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
 			Set<iSnorkMessage> incomingMessages,
@@ -138,8 +163,17 @@ public class NewPlayer extends Player {
 		currentPosition = myPosition;
 		whatISee = whatYouSee;
 		updatePlayerTracker();
+		//check if what player sees if worth sending a message
+		/*for(Object obj : whatISee) {
+			Observation creature = (Observation)obj;
+			if(isCreatureInDecoder(creature.getName())) {
+				//send message
+				System.out.print("Player " + getId() + "sent message for seeing " + creature.getName() + "\n");
+			}
+		}*/
 		return null;
 	}
+	
 
 	@Override
 	public Direction getMove() {
@@ -197,6 +231,7 @@ public class NewPlayer extends Player {
 		else 
 			return Risk.EVEN;
 	}
+	
 	
 	public Level getLevel(boolean isDangerous){
 		int tiles = getNumTiles();
