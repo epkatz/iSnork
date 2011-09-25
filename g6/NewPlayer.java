@@ -98,7 +98,7 @@ public class NewPlayer extends Player {
 	{
 		CoordinateCalculator.initCoordinateCalculator(d, r, n);
 		CoordinateCalculator.updateCoordMap();
-		CoordinateCalculator.printCoords();
+//		CoordinateCalculator.printCoords();
 //		CoordinateCalculator.updateCoordMap(CoordinateCalculator.nextIteration);
 		//CoordinateCalculator.printCoords();
 	}

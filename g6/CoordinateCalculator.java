@@ -40,7 +40,7 @@ public class CoordinateCalculator {
 			{
 				callCounter = 0;
 				loadSpiralDestinations = false;
-				System.out.println("Everyone has updated their queues");
+//				System.out.println("Everyone has updated their queues");
 				return true;
 			}
 		}
