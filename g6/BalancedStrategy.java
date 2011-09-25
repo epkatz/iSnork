@@ -151,6 +151,13 @@ public class BalancedStrategy extends Strategy {
 
 	private boolean determineIfEndGame() {
 		int travelTime = 0;
+		
+		System.out.println("Player" + player.getId() + " has seen all " + seaLifePossibilites.size() + " creatures: " + player.getWhatPlayerSaw(player.getId()).seenAllCreatures(seaLifePossibilites.size()));
+		if (player.getWhatPlayerSaw(player.getId()).seenAllCreatures(seaLifePossibilites.size()))
+		{
+			return true;
+		}
+
 		if (nextMove.getDirection().isDiag())
 		{
 			travelTime = 3;
@@ -159,6 +166,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			travelTime = 2;
 		}
+		
 		
 		if (timeBackToBoat > player.minutesLeft - travelTime)
 		{

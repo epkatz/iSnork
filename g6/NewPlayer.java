@@ -97,10 +97,19 @@ public class NewPlayer extends Player {
 		//myStrategy = decideStrategy(seaLifePossibilites, penality, d, r, n);
 	}
 	
+	/* changed so that the tracker representing the current player has the player object set to this */
+	/* this change enables not counting creatures as seen when they are seen from the boat */
 	private void initializeTracker() {
 		myTracker = new LinkedList<CreatureTracker>();
 		for(int i = 0; i < n; i++)
-			myTracker.add(new CreatureTracker(i));
+		{
+			CreatureTracker newCT = new CreatureTracker(i);
+			if (i == this.getId() * -1)
+			{
+				newCT.setPlayer(this);
+			}
+			myTracker.add(newCT);
+		}
 
 	}
 	
@@ -124,7 +133,7 @@ public class NewPlayer extends Player {
 		//CoordinateCalculator.printCoords();
 	}
 
-	private CreatureTracker getWhatPlayerSaw(int id) {
+	public CreatureTracker getWhatPlayerSaw(int id) {
 		//make id positive
 		if(id < 0) id *= -1;
 		for(int i = 0; i < myTracker.size();  i++) {
@@ -189,6 +198,18 @@ public class NewPlayer extends Player {
 			return 1;
 		//if here, then its of moderate priority
 		return 3;
+	}
+	
+	public boolean isPlayerOnBoat()
+	{
+		if (currentPosition.distance(new Point2D.Double(0,0)) == 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	@Override
