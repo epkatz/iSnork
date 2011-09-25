@@ -15,6 +15,10 @@ public class CreatureTracker {
 		
 	}
 	
+	public int getSizeOfList() {
+		return creaturesSeen.size();
+	}
+	
 	public void addToTracker(Observation creature) {
 		Creature newCreature = new Creature(creature.getName());
 		newCreature.addID(creature.getId());
@@ -32,6 +36,9 @@ public class CreatureTracker {
 		
 	//check if creature is in the list
 	public boolean didSeeCreature(String name) {
+		if(creaturesSeen.size() == 0) {	
+			return false;
+		}
 		for(int i = 0; i < creaturesSeen.size(); i++) {
 			Creature tempObject = creaturesSeen.get(i);
 			if(tempObject.getName().equals(name))

@@ -2,7 +2,8 @@ package isnork.g6;
 
 import java.util.Iterator;
 
-import isnork.g6.iSnorkDecode.Creature;
+//import isnork.g6.iSnorkDecode.Creature;
+import isnork.g7.MessageTranslator;
 import isnork.sim.GameObject.Direction;
 
 import isnork.sim.Observation;
@@ -11,8 +12,11 @@ import isnork.sim.SeaLifePrototype;
 import isnork.sim.iSnorkMessage;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.lang.*;
 
 
 public class NewPlayer extends Player {
@@ -20,11 +24,9 @@ public class NewPlayer extends Player {
 	private LinkedList<Node> path;
 	public Strategy myStrategy;
 	private LinkedList<CreatureTracker> myTracker;
-<<<<<<< HEAD
-=======
 	public iSnorkDecode decoder;
->>>>>>> filtered iSnork decode
-	public LinkedList<Destination> possibleDestinations;
+	public LinkedList<Destination> possibleDestinations; //array of each players priority queue
+	public ArrayList<LinkedList<Destination>> priorityQueue;
 	public static final int turnAroundTimeAllowance = 7;
 	public static int dangerAvoidTravelTime = 0; // default for really happy maps
 //TODO: initialize dangerAvoidTravelTime when determining how dangerous the board is
@@ -60,6 +62,8 @@ public class NewPlayer extends Player {
 	Point2D destination;
 	Set<Observation> whatISee;
 	LinkedList<Node> currentPath;
+	
+	
 
 	@Override
 	public String getName() {
@@ -80,15 +84,12 @@ public class NewPlayer extends Player {
 		this.currentPath = new LinkedList<Node>();
 		destination = null;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
-<<<<<<< HEAD
-		iSnorkDecode decoder; //used to map the char associated to a creature
-=======
->>>>>>> filtered iSnork decode
 		initializeTracker();
+		initializePriorityQueue();
+		decoder = new iSnorkDecode(seaLifePossibilites);
 		if (getId() == 0)
 		{
 			initializeCoordinates();
-			decoder = new iSnorkDecode(seaLifePossibilites);
 			//print out the dictionary
 			decoder.printDecodedList();
 		}
@@ -101,6 +102,17 @@ public class NewPlayer extends Player {
 		for(int i = 0; i < n; i++)
 			myTracker.add(new CreatureTracker(i));
 
+	}
+	
+	private void initializePriorityQueue() {
+//		for (int i = 0; i < n; i ++)
+			 //each player gets their own priority queue
+	//		possibleDestinations[i] = (LinkedList<Destination>)new LinkedList<Destination>();
+		priorityQueue = new ArrayList<LinkedList<Destination>>();
+		for (int i = 0; i < n; i ++) {
+			possibleDestinations = new LinkedList<Destination>();	
+			priorityQueue.add(possibleDestinations);
+		}
 	}
 	
 	private void initializeCoordinates()
@@ -137,7 +149,7 @@ public class NewPlayer extends Player {
 				creatureTracker.addToTracker(creature);
 				//System.out.print("Player " + id + " First time seeing: " + creature.getName() + "\n");
 			} else {
-				//add id to the list
+				//add id to the list of seen creature
 				creatureTracker.seeCreature(creature);
 				//System.out.print("Player " + id + " Already saw: " + creature.getName()+ "\n");
 			}
@@ -145,15 +157,39 @@ public class NewPlayer extends Player {
 		
 	}
 	
-	//check if creature seen is top 26 highest before sending message
-	private boolean isCreatureInDecoder(String creatureName) {
-		for(Creature obj : decoder.getCreatureList()) {
-			if(obj.getName() == creatureName)
-				return true;
+	
+	
+	private boolean shouldSendMessage(Observation creature) {
+		//check if what player sees if worth sending a message
+		//only send message if its high priority
+		if(decoder.isCreatureInDecoder(creature.getName())) {
+			//send message
+			//System.out.print("Player " + getId() + " sent message for seeing " + creature.getName() + "\n");
+			return true;
 		}
 		return false;
 	}
 	
+	private boolean isDestinationInQueue(Destination dest, int id) {
+		id *= -1;
+		for(int i = 0; i < priorityQueue.get(id).size(); i++) {
+			if(priorityQueue.get(id).get(i)== dest) {
+				return true;
+			}			
+		}
+		return false;
+	}
+	
+	public int assignPriority(String creature, boolean isDangerous) {
+		//if its a high valued creature add more, otherwise its moderate
+		//high valued creatures are added in the iSnorkDecoder so test against that
+		if(decoder.isCreatureInDecoder(creature))
+			return 5; //highest priority
+		if(isDangerous)
+			return 1;
+		//if here, then its of moderate priority
+		return 3;
+	}
 	
 	@Override
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
@@ -162,15 +198,52 @@ public class NewPlayer extends Player {
 		minutesLeft -= 1;
 		currentPosition = myPosition;
 		whatISee = whatYouSee;
+		int positiveID = -1 * getId();
+		String message = null;
+		
 		updatePlayerTracker();
-		//check if what player sees if worth sending a message
-		/*for(Object obj : whatISee) {
+		
+		//read messages
+		iSnorkMessage temp = null;
+		String mess = null;
+		SeaLifePrototype obs = null;
+		//what is the message
+		Iterator<iSnorkMessage> it = incomingMessages.iterator();
+		while(it.hasNext())
+		{	
+			temp = it.next();
+			mess= temp.getMsg();
+			obs = MessageTranslator.hm.get(mess);
+			if(obs == null)
+				continue;
+		}
+		
+		
+		//see if its worth sending a message
+		for(Object obj : whatISee) {
 			Observation creature = (Observation)obj;
-			if(isCreatureInDecoder(creature.getName())) {
-				//send message
-				System.out.print("Player " + getId() + "sent message for seeing " + creature.getName() + "\n");
+			if(shouldSendMessage(creature)) {
+				//check if creature is static
+				boolean isStatic = false;
+				for(int i = 0; i < decoder.creatureList.size(); i++) {
+					if(creature.getName() == decoder.creatureList.get(i).getName())
+						if(decoder.creatureList.get(i).isStatic)
+							isStatic = true;
+				}
+				Destination dest = new Destination(myPosition, assignPriority(creature.getName(), creature.isDangerous()), 1, isStatic);
+				//check if destination is already in the list
+				if(priorityQueue.get(positiveID).size() == 0)
+					priorityQueue.get(positiveID).add(dest);
+				if(!isDestinationInQueue(dest, getId())) {
+					//check if the player has seen the creature already, if it has don't add to the queue
+					CreatureTracker tracker = myTracker.get(positiveID);
+					if(!tracker.didSeeCreature(creature.getName())) {
+						//add this destination to the priority Queue
+						priorityQueue.get(positiveID).add(dest);
+					}
+				}
 			}
-		}*/
+		}
 		return null;
 	}
 	

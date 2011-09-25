@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class iSnorkDecode {
 	
-	private ArrayList<Creature> creatureList;
+	public ArrayList<Creature> creatureList;
 	private Set<SeaLifePrototype> totalSeaLifeList;
 	
 	public iSnorkDecode(Set<SeaLifePrototype> seaLifePossibilites) {
@@ -29,12 +29,22 @@ public class iSnorkDecode {
 		for(int i = 0; i < creatureList.size(); i++) 
 			if(creatureList.get(i).creature.equals(creatureName))
 				return creatureList.get(i).getChar();
-		System.out.print("there is no char assigned to creature: " + creatureName);
+		System.out.print("there is no char assigned to creature: " + creatureName + "\n");
 		return ' ';
 	}
 	
 	public ArrayList<Creature> getCreatureList() {
 		return creatureList;
+	}
+	
+	//check if creature seen is top 26 highest before sending message
+	public boolean isCreatureInDecoder(String creatureName) {
+		for(Object obj : creatureList) {
+			Creature creature = (Creature)obj;
+			if(creature.getName().equals(creatureName))
+				return true;
+		}
+		return false;
 	}
 	
 	
@@ -183,9 +193,14 @@ public class iSnorkDecode {
 						break;	
 					}
 					i++;
-				
 					//assign char to crature
-					Creature creature = new Creature(tempCreature.getName(), message);
+					//check if static
+					boolean isStatic;
+					if(tempCreature.getSpeed() == 0)
+						isStatic = true;
+					else
+						isStatic = false;
+					Creature creature = new Creature(tempCreature.getName(), message, isStatic);
 					//add to the creature list
 					creatureList.add(creature);
 				}
@@ -202,10 +217,12 @@ public class iSnorkDecode {
 	public class Creature {
 		String creature;
 		char creatureChar;
+		boolean isStatic;
 		
-		public Creature(String creature, char creatureChar) {
+		public Creature(String creature, char creatureChar, boolean isStatic) {
 			this.creature = creature;
 			this.creatureChar = creatureChar;
+			this.isStatic = isStatic;
 		}
 		
 		public String getName() {
@@ -215,6 +232,10 @@ public class iSnorkDecode {
 		public char getChar() {
 			return creatureChar;
 		
+		}
+		
+		public boolean isStatic() {
+			return isStatic;
 		}
 		
 		
