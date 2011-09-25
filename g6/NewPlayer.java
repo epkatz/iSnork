@@ -1,6 +1,8 @@
 package isnork.g6;
 
 import java.util.Iterator;
+
+import isnork.g6.iSnorkDecode.Creature;
 import isnork.sim.GameObject.Direction;
 
 import isnork.sim.Observation;
@@ -18,6 +20,10 @@ public class NewPlayer extends Player {
 	private LinkedList<Node> path;
 	public Strategy myStrategy;
 	private LinkedList<CreatureTracker> myTracker;
+<<<<<<< HEAD
+=======
+	public iSnorkDecode decoder;
+>>>>>>> filtered iSnork decode
 	public LinkedList<Destination> possibleDestinations;
 	public static final int turnAroundTimeAllowance = 7;
 	public static int dangerAvoidTravelTime = 0; // default for really happy maps
@@ -74,7 +80,10 @@ public class NewPlayer extends Player {
 		this.currentPath = new LinkedList<Node>();
 		destination = null;
 		myStrategy = new BalancedStrategy(seaLifePossibilites, penalty, d, r, n, this);
+<<<<<<< HEAD
 		iSnorkDecode decoder; //used to map the char associated to a creature
+=======
+>>>>>>> filtered iSnork decode
 		initializeTracker();
 		if (getId() == 0)
 		{
@@ -136,6 +145,15 @@ public class NewPlayer extends Player {
 		
 	}
 	
+	//check if creature seen is top 26 highest before sending message
+	private boolean isCreatureInDecoder(String creatureName) {
+		for(Creature obj : decoder.getCreatureList()) {
+			if(obj.getName() == creatureName)
+				return true;
+		}
+		return false;
+	}
+	
 	
 	@Override
 	public String tick(Point2D myPosition, Set<Observation> whatYouSee,
@@ -145,8 +163,17 @@ public class NewPlayer extends Player {
 		currentPosition = myPosition;
 		whatISee = whatYouSee;
 		updatePlayerTracker();
+		//check if what player sees if worth sending a message
+		/*for(Object obj : whatISee) {
+			Observation creature = (Observation)obj;
+			if(isCreatureInDecoder(creature.getName())) {
+				//send message
+				System.out.print("Player " + getId() + "sent message for seeing " + creature.getName() + "\n");
+			}
+		}*/
 		return null;
 	}
+	
 
 	@Override
 	public Direction getMove() {
