@@ -2,6 +2,7 @@ package isnork.g6;
 import isnork.sim.Observation;
 import isnork.sim.SeaLifePrototype;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class CreatureTracker {
 	
@@ -107,7 +108,6 @@ public class CreatureTracker {
 		}
 	}
 	
-	
 	public class Creature {
 		LinkedList<Integer> seen; //store id of the creatures seen
 		String creature;
@@ -121,9 +121,22 @@ public class CreatureTracker {
 			return seen;
 		}
 		
+		/* updated so if there are possibly fewer than 3 creatures
+		 * player doesn't spend a long time looking for 3 before heading
+		 * back to the boat */
 		public boolean isMaxedOut() {
-			if(seen.size() > MAX_SEEN)
+			if(seen.size() >= MAX_SEEN)
 				return true;
+			else
+			{
+				for (SeaLifePrototype slp : NewPlayer.seaLifePossibilites)
+				{
+					if (slp.getName() == creature && slp.getMaxCount() < MAX_SEEN && seen.size() >= slp.getMinCount())
+					{
+						return true;
+					}
+				}
+			}
 			return false;
 		}
 		
