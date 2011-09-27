@@ -18,7 +18,8 @@ public class BalancedStrategy extends Strategy {
 	public static final Point2D boatLocation = new Point2D.Double(0,0);
 
 	Point2D lastDestination;
-	int destinationId;
+	Destination currentDestination;
+	int lastDestinationId;
 	int acceptableDanger;
 	DangerAvoidance dangerAvoid;
 	boolean stayAtBoat;
@@ -33,7 +34,8 @@ public class BalancedStrategy extends Strategy {
 		super(seaLifePossibilites, penalty, d, r, n, p);
 
 		acceptableDanger = 0;
-		destinationId = 100;
+		lastDestinationId = 100;
+		currentDestination = new Destination(new Point2D.Double(0,0), 0, 100, true);
 		dangerAvoid = new DangerAvoidance();
 		stayAtBoat = false;
 		player.possibleDestinations = new LinkedList<Destination>();
@@ -56,21 +58,14 @@ public class BalancedStrategy extends Strategy {
 			CoordinateCalculator.updateCoordMap();
 			addSpiralDataToDestinations();
 		}
-
 		
-		if (player.destination == null || player.currentPosition.distance(player.destination) == 0 || player.currentPath.isEmpty())
+		if (player.destination == null 
+				|| player.currentPosition.distance(player.destination) == 0 
+				|| player.currentPath.isEmpty()
+				|| currentDestination.getPriority() < 0)
 		{
-			Destination nextDest = player.possibleDestinations.pop();
-			player.destination = nextDest.getDestination();
-			if(nextDest.getId() <= 0 && destinationId <= 0)
-			{
-				player.currentPath = PathManager.buildOrthogonalPath(player.currentPosition, player.destination, player.minutesLeft);
-			}
-			else
-			{
-				player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
-			}
-			destinationId = nextDest.getId();
+			updateDestination();
+			updatePath();
 		}
 		
 		nextMove = player.currentPath.getFirst();
@@ -94,7 +89,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 			{
-//				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
+				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
 			}
 		}
 
@@ -108,6 +103,42 @@ public class BalancedStrategy extends Strategy {
 			return Direction.STAYPUT;
 		}
 	}
+
+	private Destination getHighestPriorityDestination()
+	{
+		int hp = -1000;
+		Destination highestPriority = new Destination(new Point2D.Double(0,0), 0, 100, true);
+		for (Destination d : player.possibleDestinations)
+		{
+			if (d.getPriority() > hp)
+			{
+				highestPriority = d;
+				hp = d.getPriority();
+			}
+		}
+		
+		player.possibleDestinations.remove(highestPriority);
+		
+		return highestPriority;
+	}
+	
+	private void updateDestination() {
+		lastDestinationId = currentDestination.getId();
+		currentDestination = getHighestPriorityDestination();
+		player.destination = currentDestination.getDestination();
+	}
+	
+	private void updatePath() {
+		if(currentDestination.getId() <= 0 && lastDestinationId <= 0)
+		{
+			player.currentPath = PathManager.buildOrthogonalPath(player.currentPosition, player.destination, player.minutesLeft);
+		}
+		else
+		{
+			player.currentPath = PathManager.buildPath(player.currentPosition, player.destination, player.minutesLeft);
+		}
+
+	}
 	
 	private boolean validDirection(Direction d)
 	{
@@ -120,6 +151,12 @@ public class BalancedStrategy extends Strategy {
 
 	private boolean determineIfEndGame() {
 		int travelTime = 0;
+		
+		if (player.getWhatPlayerSaw(player.getId()).seenAllCreatures(seaLifePossibilites.size()))
+		{
+			return true;
+		}
+
 		if (nextMove.getDirection().isDiag())
 		{
 			travelTime = 3;
@@ -128,6 +165,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			travelTime = 2;
 		}
+		
 		
 		if (timeBackToBoat > player.minutesLeft - travelTime)
 		{
@@ -194,6 +232,10 @@ public class BalancedStrategy extends Strategy {
 		}
 		position.setLocation(x, y);
 		
+		if (player.destination == null)
+		{
+			updateDestination();
+		}
 		LinkedList<Node> directPath = PathManager.buildPath(position, player.destination, player.minutesLeft);
 		safePath.addAll(directPath);
 		
@@ -222,8 +264,11 @@ public class BalancedStrategy extends Strategy {
 
 		while (i != player.getId())
 		{
-			Destination d = CoordinateCalculator.coordMap.get(i);
-			player.possibleDestinations.add(d);
+			if (i % 4 == player.getId() % 4)
+			{
+				Destination d = CoordinateCalculator.coordMap.get(i);
+				player.possibleDestinations.add(d);
+			}
 			--i;
 			if (i <= n * -1)
 			{

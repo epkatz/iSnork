@@ -2,19 +2,50 @@ package isnork.g6;
 import isnork.sim.Observation;
 import isnork.sim.SeaLifePrototype;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class CreatureTracker {
 	
 	private LinkedList<Creature> creaturesSeen;
 	private int playerID;
 	public static final int MAX_SEEN = 3;
+	private NewPlayer player; // added
 	
 	public CreatureTracker(int playerID){
 		this.creaturesSeen = new LinkedList<Creature>();
 		this.playerID = playerID;
-		
 	}
 	
+	/* added for returning to boat if no more possible positive points */
+	public boolean seenAllCreatures(int numPossible)
+	{
+		if (getSizeOfList() == numPossible + 1)
+		{
+			for (Creature c : creaturesSeen)
+			{
+				if (!c.isMaxedOut())
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public int getSizeOfList() {
+		return creaturesSeen.size();
+	}
+	
+	/* added this so each player can add their object to their own creature tracker */
+	public void setPlayer(NewPlayer p)
+	{
+		player = p;
+	}
+
 	public void addToTracker(Observation creature) {
 		Creature newCreature = new Creature(creature.getName());
 		newCreature.addID(creature.getId());
@@ -32,6 +63,9 @@ public class CreatureTracker {
 		
 	//check if creature is in the list
 	public boolean didSeeCreature(String name) {
+		if(creaturesSeen.size() == 0) {	
+			return false;
+		}
 		for(int i = 0; i < creaturesSeen.size(); i++) {
 			Creature tempObject = creaturesSeen.get(i);
 			if(tempObject.getName().equals(name))
@@ -49,26 +83,30 @@ public class CreatureTracker {
 		}
 	}
 
+	/* added if case because when player is on the boat, it is not getting points for seeing creatures */
 	public void seeCreature(Observation creature){
-		for(Object obj : creaturesSeen) {
-			Creature tempCreature = (Creature)obj;
-			if(tempCreature.creature == creature.getName()) {
-				//System.out.print("inside\n");
-				if(tempCreature.isMaxedOut()) {
-					//System.out.print("Player: " + playerID + " has seen 3 or more " + creature.getName() + "\n");
-				} else {
-					if(tempCreature.didSeeID(creature.getId()));
+		if (player!= null && !player.isPlayerOnBoat())
+		{
+
+			for(Object obj : creaturesSeen) {
+				Creature tempCreature = (Creature)obj;
+				if(tempCreature.creature == creature.getName()) {
+					//System.out.print("inside\n");
+					if(tempCreature.isMaxedOut()) {
+						//System.out.print("Player: " + playerID + " has seen 3 or more " + creature.getName() + "\n");
+					} else {
+						if(tempCreature.didSeeID(creature.getId()));
 						//System.out.print("Player: " + playerID + " already seen ID " + creature.getId() + "\n");
-					else {
-						tempCreature.addID(creature.getId());
-						//System.out.print("Added a unique id: " + creature.getId() + " of species: " + creature.getName() + "to Player " + playerID + " tracker\n");
+						else {
+							tempCreature.addID(creature.getId());
+							//System.out.print("Added a unique id: " + creature.getId() + " of species: " + creature.getName() + "to Player " + playerID + " tracker\n");
+						}
 					}
 				}
 			}
 			
 		}
 	}
-	
 	
 	public class Creature {
 		LinkedList<Integer> seen; //store id of the creatures seen
@@ -83,9 +121,22 @@ public class CreatureTracker {
 			return seen;
 		}
 		
+		/* updated so if there are possibly fewer than 3 creatures
+		 * player doesn't spend a long time looking for 3 before heading
+		 * back to the boat */
 		public boolean isMaxedOut() {
-			if(seen.size() > MAX_SEEN)
+			if(seen.size() >= MAX_SEEN)
 				return true;
+			else
+			{
+				for (SeaLifePrototype slp : NewPlayer.seaLifePossibilites)
+				{
+					if (slp.getName() == creature && slp.getMaxCount() < MAX_SEEN && seen.size() >= slp.getMinCount())
+					{
+						return true;
+					}
+				}
+			}
 			return false;
 		}
 		
