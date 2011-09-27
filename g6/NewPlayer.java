@@ -1,11 +1,6 @@
 package isnork.g6;
 
-import java.util.Iterator;
-
-//import isnork.g6.iSnorkDecode.Creature;
-import isnork.g7.MessageTranslator;
 import isnork.sim.GameObject.Direction;
-
 import isnork.sim.Observation;
 import isnork.sim.Player;
 import isnork.sim.SeaLifePrototype;
@@ -13,10 +8,9 @@ import isnork.sim.iSnorkMessage;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
-import java.lang.*;
 
 
 public class NewPlayer extends Player {
@@ -62,6 +56,7 @@ public class NewPlayer extends Player {
 	Point2D destination;
 	Set<Observation> whatISee;
 	LinkedList<Node> currentPath;
+	public int averageDanger;
 	
 	
 
@@ -78,6 +73,18 @@ public class NewPlayer extends Player {
 		NewPlayer.d = d;
 		NewPlayer.r = r;
 		NewPlayer.n = n;
+		
+		/* Added average danger for Danger Avoidance -Eli */
+		int tiles = NewPlayer.d * NewPlayer.d + 1;
+		int totalMaxDanger = 0;
+		int totalMinDanger = 0;
+		for (SeaLifePrototype s: seaLifePossibilites){
+			if (s.isDangerous()){
+				totalMaxDanger += s.getHappiness()*s.getMaxCount();
+				totalMinDanger += s.getHappiness()*s.getMinCount();
+			}
+		}
+		averageDanger = (totalMaxDanger + totalMinDanger) / 2;
 		
 		minutesLeft = 8 * 60;
 		assignTravelTimeAllowance();

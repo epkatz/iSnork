@@ -1,6 +1,7 @@
 
 package isnork.g6;
 
+import isnork.g6.NewPlayer.Level;
 import isnork.sim.GameEngine;
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
@@ -31,7 +32,7 @@ public class DangerAvoidance {
 	private static final int SOUTHEAST = 315;
 
 	public LinkedList<Node> buildSafePath(NewPlayer p) {
-		//System.out.println("Player " + p.getId() + " sees Danger!");
+		// System.out.println("Player " + p.getId() + " sees Danger!");
 		DangerMap dm = null;
 		Point2D np = null;
 		try {
@@ -62,10 +63,11 @@ public class DangerAvoidance {
 						Direction sd = o.getDirection();
 						int sX = (int) sP.getX();
 						int sY = (int) sP.getY();
-						//System.out.println("Seeing " + o.getName() + " at " + sX + "," + sY);
+						// System.out.println("Seeing " + o.getName() + " at " +
+						// sX + "," + sY);
 						if (!(sl.getSpeed() > 0) || sd == null) {
 							dm.addValue(sHappy, sX, sY);
-							//System.out.println(o.getName() + " is static");
+							// System.out.println(o.getName() + " is static");
 						} else {
 							calcPositions(dm, sd, 0, 100.0, sX, sY, sHappy);
 						}
@@ -82,11 +84,11 @@ public class DangerAvoidance {
 		ArrayList<Direction> dirs = Direction.allBut(Direction.STAYPUT);
 		for (Direction d : dirs) {
 			if (d.getDegrees() == sD.getDegrees()) {
-				dm.addValue((sHappy * (0.79 * chance)), sX + d.getDx(), sY + d.getDy());
-				calcPositions(dm, sD, (r + 1), (0.79), sX + d.getDx(), sY + d.getDy(), sHappy);
+				dm.addValue((sHappy * chance), sX + d.getDx(), sY + d.getDy());
+				calcPositions(dm, sD, (r + 1), (sHappy * (0.79 * chance)), sX + d.getDx(), sY + d.getDy(), sHappy);
 			} else {
 				dm.addValue((sHappy * (0.03 * chance)), sX + d.getDx(), sY + d.getDy());
-				calcPositions(dm, sD, (r + 1), (0.03), sX + d.getDx(), sY + d.getDy(), sHappy);
+				calcPositions(dm, sD, (r + 1), (sHappy * (0.03 * chance)), sX + d.getDx(), sY + d.getDy(), sHappy);
 			}
 		}
 	}
@@ -97,7 +99,7 @@ public class DangerAvoidance {
 
 		public Point2D safestPoint(Point2D cur, Point2D dest) {
 			Comparator<DangerNode> comparator = new StringLengthComparator();
-			PriorityQueue<DangerNode> dp = new PriorityQueue<DangerNode>(NewPlayer.r*NewPlayer.r, comparator);
+			PriorityQueue<DangerNode> dp = new PriorityQueue<DangerNode>((NewPlayer.r + 1) * (NewPlayer.r + 1), comparator);
 			for (int i = 0; i < dm.length; i++) {
 				for (int j = 0; j < dm.length; j++) {
 					dp.add(new DangerNode(new Point2D.Double((double) toBoard(i), (double) toBoard(j)), dm[i][j]));
@@ -113,7 +115,7 @@ public class DangerAvoidance {
 					bestCount = count;
 				}
 			}
-			//System.out.println(cur + " to " + bestD.p + " to " + dest);
+			System.out.println(cur + " to " + bestD.p + " to " + dest + " with danger " + bestCount);
 			return bestD.p;
 		}
 
@@ -149,8 +151,7 @@ public class DangerAvoidance {
 					deltay += 1;
 				}
 				double counter = dm[toMap((int) (d.getX() - deltax))][toMap((int) (d.getY() - deltay))];
-				// System.out.println((int) (d.getX() - deltax) + "," + (int)
-				// (d.getY() - deltay) + " danger: " + counter);
+				System.out.println((int) (d.getX() - deltax) + "," + (int) (d.getY() - deltay) + " danger: " + counter);
 				count += counter;
 			}
 			return count;
@@ -187,7 +188,7 @@ public class DangerAvoidance {
 			for (int i = 0; i < dm.length; i++) {
 				for (int j = 0; j < dm.length; j++) {
 					if (Math.sqrt((x - toBoard(i)) * (x - toBoard(i)) + (y - toBoard(j)) * (y - toBoard(j))) >= r) {
-						dm[i][j] = HIGH_NUMBER;
+						dm[i][j] = 0;
 					}
 				}
 			}
@@ -481,11 +482,13 @@ public class DangerAvoidance {
 					if (sl.getName().equals(o.getName())) {
 						if (!(sl.getSpeed() > 0)) {
 							if (o.getLocation().distance(pos) <= 2) {
-								//System.out.println("Static Danger at " + o.getLocation());
+								// System.out.println("Static Danger at " +
+								// o.getLocation());
 								return true;
 							}
 						} else if (o.getLocation().distance(pos) <= 4.5) {
-							//System.out.println("Moving Danger at " + o.getLocation());
+							// System.out.println("Moving Danger at " +
+							// o.getLocation());
 							return true;
 						}
 					}
