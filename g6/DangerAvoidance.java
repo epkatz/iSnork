@@ -83,10 +83,10 @@ public class DangerAvoidance {
 		for (Direction d : dirs) {
 			if (d.getDegrees() == sD.getDegrees()) {
 				dm.addValue((sHappy * (0.79 * chance)), sX + d.getDx(), sY + d.getDy());
-				calcPositions(dm, sD, (r + 1), (chance * 0.79), sX + d.getDx(), sY + d.getDy(), sHappy);
+				calcPositions(dm, sD, (r + 1), (0.79), sX + d.getDx(), sY + d.getDy(), sHappy);
 			} else {
-				dm.addValue((sHappy * (0.79 * chance)), sX + d.getDx(), sY + d.getDy());
-				calcPositions(dm, sD, (r + 1), (chance * 0.03), sX + d.getDx(), sY + d.getDy(), sHappy);
+				dm.addValue((sHappy * (0.03 * chance)), sX + d.getDx(), sY + d.getDy());
+				calcPositions(dm, sD, (r + 1), (0.03), sX + d.getDx(), sY + d.getDy(), sHappy);
 			}
 		}
 	}
