@@ -54,8 +54,8 @@ public class BalancedStrategy extends Strategy {
 			addSpiralDataToDestinations();
 		}
 		
-		LinkedList<Node> safePath = null;
-		while (safePath == null)
+		boolean loopAgain = true;
+		while (loopAgain)
 		{
 			if (player.possibleDestinations.isEmpty())
 			{
@@ -93,16 +93,21 @@ public class BalancedStrategy extends Strategy {
 			{
 				if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
 				{
-					safePath = dangerAvoid.buildSafePath(player);
+					LinkedList<Node> safePath = dangerAvoid.buildSafePath(player);
 					if (safePath != null)
 					{
 						updatePathToAvoidDanger(safePath);
+						loopAgain = false;
 					}
+				}
+				else
+				{
+					loopAgain = false;
 				}
 			}
 			else
 			{
-				safePath = new LinkedList<Node>();
+				loopAgain = false;
 			}
 		}
 
