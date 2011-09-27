@@ -53,43 +53,52 @@ public class BalancedStrategy extends Strategy {
 		{
 			addSpiralDataToDestinations();
 		}
-		else if (player.possibleDestinations.isEmpty())
-		{
-			CoordinateCalculator.updateCoordMap();
-			addSpiralDataToDestinations();
-		}
 		
-		if (player.destination == null 
-				|| player.currentPosition.distance(player.destination) == 0 
-				|| player.currentPath.isEmpty()
-				|| currentDestination.getPriority() < 0)
+		LinkedList<Node> safePath = null;
+		while (safePath == null)
 		{
-			updateDestination();
-			updatePath();
-		}
+			if (player.possibleDestinations.isEmpty())
+			{
+				CoordinateCalculator.updateCoordMap();
+				addSpiralDataToDestinations();
+			}
 		
-		nextMove = player.currentPath.getFirst();
-		nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
+			if (player.destination == null 
+					|| player.currentPosition.distance(player.destination) == 0 
+					|| player.currentPath.isEmpty()
+					|| currentDestination.getPriority() < 0)
+			{
+				updateDestination();
+				updatePath();
+			}
+		
+			nextMove = player.currentPath.getFirst();
+			nextPosition = new Point2D.Double(nextMove.getDirection().getDx() + player.currentPosition.getX(),
 												nextMove.getDirection().getDy() + player.currentPosition.getY());
-		timeBackToBoat = (PathManager.computeDiagonalSpaces(nextPosition, boatLocation) * 3) 
-				+ (PathManager.computeAdjacentSpaces(nextPosition, boatLocation) * 2)
-				+ NewPlayer.dangerAvoidTravelTime; // computes how much time it would take to get back to the boat
+			timeBackToBoat = (PathManager.computeDiagonalSpaces(nextPosition, boatLocation) * 3) 
+					+ (PathManager.computeAdjacentSpaces(nextPosition, boatLocation) * 2)
+					+ NewPlayer.dangerAvoidTravelTime; // computes how much time it would take to get back to the boat
 									// if I move where I'm intending to move
 
-		if (!stayAtBoat)
-		{
-			stayAtBoat = determineIfEndGame();
-			if (stayAtBoat)
+			if (!stayAtBoat)
 			{
-				updatePathForEndGame();
+				stayAtBoat = determineIfEndGame();
+				if (stayAtBoat)
+				{
+					updatePathForEndGame();
+				}
 			}
-		}
-
-		if (timeBackToBoat < player.minutesLeft - 3)
-		{
-			if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
+			
+			if (timeBackToBoat < player.minutesLeft - 3)
 			{
-				updatePathToAvoidDanger(dangerAvoid.buildSafePath(player));
+				if (dangerAvoid.isLocationDangerous(player.whatISee, nextPosition))
+				{
+					safePath = dangerAvoid.buildSafePath(player);
+					if (safePath != null)
+					{
+						updatePathToAvoidDanger(safePath);
+					}
+				}
 			}
 		}
 
@@ -142,11 +151,23 @@ public class BalancedStrategy extends Strategy {
 	
 	private boolean validDirection(Direction d)
 	{
-		//TODO: Make more robust
 		if (d == null)
+		{
 			return false;
+		}
 		else
-			return true;
+		{
+			nextPosition = new Point2D.Double(d.getDx() + player.currentPosition.getX(),
+					d.getDy() + player.currentPosition.getY());
+			if (pastTheWall(nextPosition))
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
 	}
 
 	private boolean determineIfEndGame() {
@@ -221,8 +242,9 @@ public class BalancedStrategy extends Strategy {
 		if (safePath == null)
 		{
 			System.out.println("NULL LINKED LIST");
+			return;
 		}
-		Point2D position = player.currentPosition;
+/*		Point2D position = player.currentPosition;
 		double x = position.getX();
 		double y = position.getY();
 		for (Node n : safePath)
@@ -238,7 +260,7 @@ public class BalancedStrategy extends Strategy {
 		}
 		LinkedList<Node> directPath = PathManager.buildPath(position, player.destination, player.minutesLeft);
 		safePath.addAll(directPath);
-		
+*/		
 		player.currentPath = safePath;
 	}
 	
@@ -427,9 +449,9 @@ public class BalancedStrategy extends Strategy {
 		}
 	}*/
 	
-/*	private boolean atTheWall(Point2D p)
+	private boolean pastTheWall(Point2D p)
 	{
-		if (Math.abs(p.getX()) == d || Math.abs(p.getY()) == d)
+		if (Math.abs(p.getX()) > d || Math.abs(p.getY()) > d)
 		{
 			return true;
 		}
@@ -437,7 +459,7 @@ public class BalancedStrategy extends Strategy {
 		{
 			return false;
 		}
-	}*/
+	}
 	
 /*	private Direction moveClockwise(Direction d, int numSteps)
 	{
