@@ -100,6 +100,10 @@ public class BalancedStrategy extends Strategy {
 					}
 				}
 			}
+			else
+			{
+				safePath = new LinkedList<Node>();
+			}
 		}
 
 		nextMove = player.currentPath.pop();
