@@ -56,7 +56,7 @@ public class NewPlayer extends Player {
 	Point2D destination;
 	Set<Observation> whatISee;
 	LinkedList<Node> currentPath;
-	public int averageDanger;
+	public static int averageDanger;
 	
 	
 
