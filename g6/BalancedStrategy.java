@@ -295,11 +295,8 @@ public class BalancedStrategy extends Strategy {
 
 		while (i != player.getId())
 		{
-/*			if (i % 4 == player.getId() % 4)
-			{*/
 				Destination d = CoordinateCalculator.coordMap.get(i);
 				player.possibleDestinations.add(d);
-//			}
 			--i;
 			if (i <= n * -1)
 			{
