@@ -114,7 +114,8 @@ public class DangerAvoidance {
 					bestCount = count;
 				}
 			}
-			//System.out.println(cur + " to " + bestD.p + " to " + dest + " with danger " + bestCount);
+			// System.out.println(cur + " to " + bestD.p + " to " + dest +
+			// " with danger " + bestCount);
 			return bestD.p;
 		}
 
@@ -150,7 +151,8 @@ public class DangerAvoidance {
 					deltay += 1;
 				}
 				double counter = dm[toMap((int) (d.getX() - deltax))][toMap((int) (d.getY() - deltay))];
-				//System.out.println((int) (d.getX() - deltax) + "," + (int) (d.getY() - deltay) + " danger: " + counter);
+				// System.out.println((int) (d.getX() - deltax) + "," + (int)
+				// (d.getY() - deltay) + " danger: " + counter);
 				count += counter;
 			}
 			return count;
@@ -475,23 +477,11 @@ public class DangerAvoidance {
 		while (itr.hasNext()) {
 			Observation o = itr.next();
 			if (o.isDangerous()) {
-				Iterator<SeaLifePrototype> it = NewPlayer.seaLifePossibilites.iterator();
-				while (it.hasNext()) {
-					SeaLifePrototype sl = (SeaLifePrototype) it.next();
-					if (sl.getName().equals(o.getName())) {
-						if (!(sl.getSpeed() > 0)) {
-							if (o.getLocation().distance(pos) <= 2) {
-								// System.out.println("Static Danger at " +
-								// o.getLocation());
-								return true;
-							}
-						} else if (o.getLocation().distance(pos) <= 4.5) {
-							// System.out.println("Moving Danger at " +
-							// o.getLocation());
-							return true;
-						}
-					}
+				if (o.getLocation().distance(pos) <= 2) {
+					System.out.println("Static Danger at " + o.getLocation());
+					return true;
 				}
+
 			}
 		}
 		return false;
