@@ -477,7 +477,7 @@ public class DangerAvoidance {
 		while (itr.hasNext()) {
 			Observation o = itr.next();
 			if (o.isDangerous()) {
-				if (o.getLocation().distance(pos) <= 2) {
+				if (o.getLocation().distance(pos) <= 4) {
 					System.out.println("Static Danger at " + o.getLocation());
 					return true;
 				}
@@ -492,7 +492,7 @@ public class DangerAvoidance {
 		Iterator<Observation> itr = whatISee.iterator();
 		while (itr.hasNext()) {
 			Observation o = itr.next();
-			if (o.isDangerous() && o.getLocation().distance(pos) <= 2) {
+			if (o.isDangerous() && o.getLocation().distance(pos) <= 4) {
 				danger += o.happiness() * 2;
 			}
 		}
