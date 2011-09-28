@@ -229,6 +229,9 @@ public class NewPlayer extends Player {
 		int positiveID = -1 * getId();
 		String message = null;
 		
+		if (true)
+			return null;
+		
 		updatePlayerTracker();
 		
 		//read messages
@@ -241,7 +244,7 @@ public class NewPlayer extends Player {
 		{	
 			temp = it.next();
 			mess= temp.getMsg();
-			obs = MessageTranslator.hm.get(mess);
+//			obs = MessageTranslator.hm.get(mess);
 			if(obs == null)
 				continue;
 		}

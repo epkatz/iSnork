@@ -55,8 +55,8 @@ public class BalancedStrategy extends Strategy {
 		}
 		
 		boolean loopAgain = true;
-		while (loopAgain)
-		{
+/*		while (loopAgain)
+		{*/
 			if (player.possibleDestinations.isEmpty())
 			{
 				CoordinateCalculator.updateCoordMap();
@@ -109,7 +109,7 @@ public class BalancedStrategy extends Strategy {
 			{
 				loopAgain = false;
 			}
-		}
+//		}
 
 		nextMove = player.currentPath.pop();
 		if (validDirection(nextMove.getDirection()))
@@ -295,11 +295,11 @@ public class BalancedStrategy extends Strategy {
 
 		while (i != player.getId())
 		{
-			if (i % 4 == player.getId() % 4)
-			{
+/*			if (i % 4 == player.getId() % 4)
+			{*/
 				Destination d = CoordinateCalculator.coordMap.get(i);
 				player.possibleDestinations.add(d);
-			}
+//			}
 			--i;
 			if (i <= n * -1)
 			{
