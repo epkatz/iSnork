@@ -43,8 +43,6 @@ public class DangerAvoidance {
 			np = p.currentPosition;
 		}
 		LinkedList<Node> l = PathManager.buildPath(p.currentPosition, np, p.minutesLeft);
-		LinkedList<Node> m = PathManager.buildPath(np, p.destination, p.minutesLeft);
-		l.addAll(m);
 		return l;
 	}
 
@@ -83,10 +81,10 @@ public class DangerAvoidance {
 		for (Direction d : dirs) {
 			if (d.getDegrees() == sD.getDegrees()) {
 				dm.addValue((sHappy * chance), sX + d.getDx(), sY + d.getDy());
-				calcPositions(dm, sD, (r + 1), (sHappy * (0.79 * chance)), sX + d.getDx(), sY + d.getDy(), sHappy);
+				calcPositions(dm, sD, (r + 1), (0.79 * chance), sX + d.getDx(), sY + d.getDy(), sHappy);
 			} else {
 				dm.addValue((sHappy * (0.03 * chance)), sX + d.getDx(), sY + d.getDy());
-				calcPositions(dm, sD, (r + 1), (sHappy * (0.03 * chance)), sX + d.getDx(), sY + d.getDy(), sHappy);
+				calcPositions(dm, sD, (r + 1), (0.03 * chance), sX + d.getDx(), sY + d.getDy(), sHappy);
 			}
 		}
 	}
@@ -105,8 +103,7 @@ public class DangerAvoidance {
 			}
 			double bestCount = Double.MAX_VALUE;
 			DangerNode bestD = dp.peek();
-			int i = 0;
-			while (!dp.isEmpty() && i++ < 100) {
+			while (!dp.isEmpty()) {
 				DangerNode dn = dp.remove();
 				double count = testPoint(cur, dn.p) + testPoint(dn.p, dest);
 				if (count < bestCount) {
@@ -189,7 +186,7 @@ public class DangerAvoidance {
 			for (int i = 0; i < dm.length; i++) {
 				for (int j = 0; j < dm.length; j++) {
 					if (Math.sqrt((x - toBoard(i)) * (x - toBoard(i)) + (y - toBoard(j)) * (y - toBoard(j))) >= r) {
-						dm[i][j] = Double.MAX_VALUE;
+						dm[i][j] = HIGH_NUMBER;
 					}
 				}
 			}
@@ -477,7 +474,7 @@ public class DangerAvoidance {
 		while (itr.hasNext()) {
 			Observation o = itr.next();
 			if (o.isDangerous()) {
-				if (o.getLocation().distance(pos) <= 4) {
+				if (o.getLocation().distance(pos) <= 3) {
 					System.out.println("Static Danger at " + o.getLocation());
 					return true;
 				}
