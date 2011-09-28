@@ -32,7 +32,7 @@ public class DangerAvoidance {
 	private static final int SOUTHEAST = 315;
 
 	public LinkedList<Node> buildSafePath(NewPlayer p) {
-		// System.out.println("Player " + p.getId() + " sees Danger!");
+		System.out.println("Player " + p.getId() + " sees Danger!");
 		DangerMap dm = null;
 		Point2D np = null;
 		try {
@@ -40,13 +40,11 @@ public class DangerAvoidance {
 			findDanger(dm, p, p.currentPosition, NewPlayer.r);
 			np = dm.safestPoint(p.currentPosition, p.destination);
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		if (np == null) {
 			np = p.currentPosition;
 		}
 		LinkedList<Node> l = PathManager.buildPath(p.currentPosition, np, p.minutesLeft);
+		LinkedList<Node> m = PathManager.buildPath(np, p.destination, p.minutesLeft);
+		l.addAll(m);
 		return l;
 	}
 
@@ -107,7 +105,8 @@ public class DangerAvoidance {
 			}
 			double bestCount = Double.MAX_VALUE;
 			DangerNode bestD = dp.peek();
-			while (!dp.isEmpty()) {
+			int i = 0;
+			while (!dp.isEmpty() && i++ < 100) {
 				DangerNode dn = dp.remove();
 				double count = testPoint(cur, dn.p) + testPoint(dn.p, dest);
 				if (count < bestCount) {
@@ -115,7 +114,7 @@ public class DangerAvoidance {
 					bestCount = count;
 				}
 			}
-			System.out.println(cur + " to " + bestD.p + " to " + dest + " with danger " + bestCount);
+			//System.out.println(cur + " to " + bestD.p + " to " + dest + " with danger " + bestCount);
 			return bestD.p;
 		}
 
@@ -151,7 +150,7 @@ public class DangerAvoidance {
 					deltay += 1;
 				}
 				double counter = dm[toMap((int) (d.getX() - deltax))][toMap((int) (d.getY() - deltay))];
-				System.out.println((int) (d.getX() - deltax) + "," + (int) (d.getY() - deltay) + " danger: " + counter);
+				//System.out.println((int) (d.getX() - deltax) + "," + (int) (d.getY() - deltay) + " danger: " + counter);
 				count += counter;
 			}
 			return count;
@@ -188,7 +187,7 @@ public class DangerAvoidance {
 			for (int i = 0; i < dm.length; i++) {
 				for (int j = 0; j < dm.length; j++) {
 					if (Math.sqrt((x - toBoard(i)) * (x - toBoard(i)) + (y - toBoard(j)) * (y - toBoard(j))) >= r) {
-						dm[i][j] = 0;
+						dm[i][j] = Double.MAX_VALUE;
 					}
 				}
 			}
