@@ -1,11 +1,17 @@
 package isnork.g6;
 
+<<<<<<< HEAD
+=======
+import java.util.Iterator;
+
+//import isnork.g6.iSnorkDecode.Creature;
+import isnork.g6.MessageTranslator;
+>>>>>>> test
 import isnork.sim.GameObject.Direction;
 import isnork.sim.Observation;
 import isnork.sim.Player;
 import isnork.sim.SeaLifePrototype;
 import isnork.sim.iSnorkMessage;
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -149,7 +155,7 @@ public class NewPlayer extends Player {
 				return creatureTracker;
 		}
 		
-		System.out.print("ERROR: Diver's tracker could not be found");
+		//System.out.print("ERROR: Diver's tracker could not be found");
 		return null;
 	}
 	 
@@ -229,16 +235,21 @@ public class NewPlayer extends Player {
 		int positiveID = -1 * getId();
 		String message = null;
 		
+<<<<<<< HEAD
 		if (true)
 			return null;
 		
 		updatePlayerTracker();
+=======
+		//updatePlayerTracker();
+>>>>>>> test
 		
 		//read messages
 		iSnorkMessage temp = null;
 		String mess = null;
 		SeaLifePrototype obs = null;
 		//what is the message
+<<<<<<< HEAD
 		Iterator<iSnorkMessage> it = incomingMessages.iterator();
 		while(it.hasNext())
 		{	
@@ -248,6 +259,17 @@ public class NewPlayer extends Player {
 			if(obs == null)
 				continue;
 		}
+=======
+//		Iterator<iSnorkMessage> it = incomingMessages.iterator();
+//		while(it.hasNext())
+//		{	
+//			temp = it.next();
+//			mess= temp.getMsg();
+//			obs = MessageTranslator.hm.get(mess);
+//			if(obs == null)
+//				continue;
+//		}
+>>>>>>> test
 		
 		
 		//see if its worth sending a message
@@ -275,6 +297,9 @@ public class NewPlayer extends Player {
 				}
 			}
 		}
+		
+		System.out.print(priorityQueue.get(2));
+		
 		return null;
 	}
 	

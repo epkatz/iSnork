@@ -210,7 +210,7 @@ public class iSnorkDecode {
 	
 	public void printDecodedList() {
 		for(int i = 0; i < creatureList.size(); i++) {
-			System.out.print(creatureList.get(i).getName() + " = " + creatureList.get(i).getChar() + "\n");
+			//System.out.print(creatureList.get(i).getName() + " = " + creatureList.get(i).getChar() + "\n");
 		}
 	}
 		
